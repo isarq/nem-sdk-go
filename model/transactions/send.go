@@ -1,11 +1,11 @@
 package transactions
 
 import (
-	"github.com/pkg/errors"
 	"github.com/isarq/nem-sdk-go/com/requests"
 	"github.com/isarq/nem-sdk-go/extras"
 	"github.com/isarq/nem-sdk-go/model"
 	"github.com/isarq/nem-sdk-go/utils"
+	"github.com/pkg/errors"
 )
 
 type Common struct {
