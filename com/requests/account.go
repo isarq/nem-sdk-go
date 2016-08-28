@@ -64,17 +64,17 @@ type AccountMetaDataPair struct {
 
 // HarvestInfo is information about harvested blocks
 type HarvestInfo struct {
-	TimeStamp  int
+	TimeStamp  int64
 	Difficulty int
 	TotalFee   int
 	ID         int
-	Height     int
+	Height     int64
 }
 
 // TransactionMetaData struct contains additional information about the transaction.
 type TransactionMetaData struct {
 	// The height of the block in which the transaction was included.
-	Height int `json:"height"`
+	Height int64 `json:"height"`
 	// The id of the transaction.
 	ID int `json:"id"`
 	// The transaction hash.

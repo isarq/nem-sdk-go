@@ -30,7 +30,7 @@ type Meta struct {
 type Namespace struct {
 	Fqn    string `json:"fqn"`
 	Owner  string `json:"owner"`
-	Height int    `json:"height"`
+	Height int64  `json:"height"`
 }
 
 // Gets root namespaces.

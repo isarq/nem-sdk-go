@@ -14,7 +14,7 @@ import (
 
 // BlockHeight contains a chain height
 type BlockHeight struct {
-	Height int
+	Height int64
 }
 
 type TimeStamps struct {
@@ -29,14 +29,14 @@ type Client struct {
 }
 
 type Block struct {
-	TimeStamp     int           `json:"timeStamp"`
+	TimeStamp     int64         `json:"timeStamp"`
 	Signature     string        `json:"signature"`
 	PrevBlockHash PrevBlockHash `json:"prevBlockHash"`
 	Type          int           `json:"type"`
 	Transactions  []interface{} `json:"transactions"`
 	Version       int           `json:"version"`
 	Signer        string        `json:"signer"`
-	Height        int           `json:"height"`
+	Height        int64         `json:"height"`
 }
 
 type PrevBlockHash struct {

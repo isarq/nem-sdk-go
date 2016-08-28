@@ -1,7 +1,7 @@
 package base
 
 type Error struct {
-	TimeStamp int
+	TimeStamp int64
 	Error     string
 	Message   string
 	Status    int
@@ -159,10 +159,10 @@ type ProvisionNamespaceTransaction struct {
 }
 
 type MultisigSignatureTransaction struct {
-	TimeStamp int    `json:"timeStamp"`
+	TimeStamp int64  `json:"timeStamp"`
 	Fee       int    `json:"fee"`
 	Type      int    `json:"type"`
-	Deadline  int    `json:"deadline"`
+	Deadline  int64  `json:"deadline"`
 	Version   int    `json:"version"`
 	Signer    string `json:"signer"`
 	OtherHash struct {
