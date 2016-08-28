@@ -187,7 +187,7 @@ func main() {
 		fmt.Println(utils.Struc2Json(err))
 		return
 	}
-	fmt.Printf("Harvested blocks:\n%s", utils.Struc2Json(r))
+	fmt.Printf("Harvested LastBlock:\n%s", utils.Struc2Json(r))
 
 	// 20 - Get information about the maximum number of allowed harvesters and
 	// how many harvesters are already using the node.
@@ -205,5 +205,4 @@ func main() {
 		return
 	}
 	fmt.Printf("Forwarded:\n%s", utils.Struc2Json(t))
-
 }
