@@ -5,7 +5,7 @@ NEM Developer Kit for Golang based on https://github.com/QuantumMechanics/NEM-sd
 
 # types of requests
 ### Account gets
-  - Get account data from account adress
+  - Get account data from account address
   - Get account data from public key
   - Gets the AccountMetaDataPair of an array of accounts
 ### Transactions gets
