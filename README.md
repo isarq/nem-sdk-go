@@ -58,7 +58,7 @@ NEM Developer Kit for Golang based on https://github.com/QuantumMechanics/NEM-sd
 ### Installation
 
 ```sh
-$ go get https://github.com/isarq/nem-sdk-go
+$ go get -u github.com/isarq/nem-sdk-go
 ```
 
 ### Development
@@ -69,7 +69,6 @@ Want to contribute? Great!
 ### Todos
 
  - Write MORE Tests
- - Add Night Mode
 
 License
 ----
