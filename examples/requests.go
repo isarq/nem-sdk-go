@@ -1,11 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"github.com/isarq/nem-sdk-go/com/requests"
 	"github.com/isarq/nem-sdk-go/model"
-	"github.com/isarq/nem-sdk-go/model/objects"
 	"github.com/isarq/nem-sdk-go/utils"
+
+	"fmt"
+	"github.com/isarq/nem-sdk-go/model/objects"
 )
 
 func main() {
@@ -20,7 +21,7 @@ func main() {
 	client := requests.NewClient(endpoint)
 
 	// ******** ACCOUNT GETS ********
-
+	//
 	// 1 - Get account data from account adress
 	b, err := client.AccountData(address)
 	if err != nil {
@@ -83,8 +84,8 @@ func main() {
 	}
 	fmt.Printf("MosaicDefinitionsCreated:\n%s", utils.Struc2Json(h))
 
-	// 8 - Gets mosaic definitions that an account owns.
-	i, err := client.MosaicDefinitions(address)
+	// 8 - mosaic definitions of a namespace or sub-namespace.
+	i, err := client.MosaicDefinitions("nw.fiat")
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return
