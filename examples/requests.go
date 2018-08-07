@@ -21,7 +21,7 @@ func main() {
 	client := requests.NewClient(endpoint)
 
 	// ******** ACCOUNT GETS ********
-	//
+
 	// 1 - Get account data from account adress
 	b, err := client.AccountData(address)
 	if err != nil {
@@ -84,7 +84,7 @@ func main() {
 	}
 	fmt.Printf("MosaicDefinitionsCreated:\n%s", utils.Struc2Json(h))
 
-	// 8 - mosaic definitions of a namespace or sub-namespace.
+	// 8 - Get mosaic definitions of a namespace or sub-namespace.
 	i, err := client.MosaicDefinitions("nw.fiat")
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))

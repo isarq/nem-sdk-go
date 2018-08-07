@@ -21,7 +21,7 @@ NEM Developer Kit for Golang based on https://github.com/QuantumMechanics/NEM-sd
 ### Mosaic gets
   - Gets an array of mosaic objects for a given account address.
   - Gets an array of mosaic definition objects for a given account address.
-  - Gets mosaic definitions that an account owns.
+  - Gets mosaics definitions of a namespace or sub-namespace.
 ### Namespace gets
   - Gets an array of namespace objects for a given account address.
 ### Harvesting gets
