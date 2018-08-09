@@ -1,5 +1,5 @@
 # Nem-sdk-go 
-[![N|Solid](http://isarq.com/descargas/Nem-go.png)](https://nodesource.com/products/nsolid)
+![N|Solid](https://github.com/isarq/nem-sdk-go/blob/master/assets/tipo.jpg)
 
 NEM Developer Kit for Golang based on https://github.com/QuantumMechanics/NEM-sdk
 
