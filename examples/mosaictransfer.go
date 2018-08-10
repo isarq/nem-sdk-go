@@ -15,7 +15,7 @@ func main() {
 	client := requests.NewClient(endpoint)
 
 	// Create a common object holding key
-	common := objects.GetCommon("", "7a9f29e69d0611f3945de59e48973af4c36b19ca82e173e0a43cd588ac3d5056", false)
+	common := objects.GetCommon("", "064862b3dffbfd67a78172cf04c6a917325f2325f40cd48eea736f40b8b96d49", false)
 
 	// Create variable to store our mosaic definitions,
 	// needed to calculate fees properly (already contains xem definition)
@@ -25,9 +25,9 @@ func main() {
 	// (use same object as transfer tansaction)
 	tx := objects.Transfer("TCSBBN-7XUDLR-OZXZYJ-RCDZQC-33T3HE-FM3B4E-SESM", 1, "")
 
-	////// Enable Multisig
+	//// Enable Multisig
 	//tx.IsMultisig = true
-	////
+	//
 	//// Publickey of the multifirm account (only if IsMultisig is true).
 	//tx.MultisigAccount = "31efa466d2c0aee147397ec3bbe16354fd6fc10eb6710014c8d9a8924ad9b152"
 
