@@ -92,35 +92,44 @@ func main() {
 	}
 	fmt.Printf("MosaicDefinitions:\n%s", utils.Struc2Json(i))
 
-	// ******** NAMESPACE GETS ********
-
-	// 9 - Gets an array of namespace objects for a given account address.
-	// The parent parameter is optional. If supplied, only sub-namespaces of the parent namespace are returned.
-	j, err := client.NamespacesOwned(address, "")
+	// 9 - Get mosaic Supply.
+	// The parent parameter is optional.
+	j, err := client.Supply("nw.fiat")
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return
 	}
-	fmt.Printf("NamespacesOwned:\n%s", utils.Struc2Json(j))
+	fmt.Printf("Supply:\n%s", utils.Struc2Json(j))
+
+	// ******** NAMESPACE GETS ********
+
+	// 10 - Gets an array of namespace objects for a given account address.
+	// The parent parameter is optional. If supplied, only sub-namespaces of the parent namespace are returned.
+	k, err := client.NamespacesOwned(address, "")
+	if err != nil {
+		fmt.Println(utils.Struc2Json(err))
+		return
+	}
+	fmt.Printf("NamespacesOwned:\n%s", utils.Struc2Json(k))
 
 	// ******** HARVESTING GETS ********
 
-	// 10 - Get harvested blocks
-	k, err := client.HarvestedBlocks(address)
+	// 11 - Get harvested blocks
+	l, err := client.HarvestedBlocks(address)
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return
 	}
-	fmt.Printf("Harvested blocks:\n%s", utils.Struc2Json(k))
+	fmt.Printf("Harvested blocks:\n%s", utils.Struc2Json(l))
 
-	// 11 - Starts harvesting
+	// 12 - Starts harvesting
 	err = client.StartHarvesting(publickey)
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return
 	}
 
-	// 12 - Stop harvesting
+	// 13 - Stop harvesting
 	err = client.StopHarvesting(publickey)
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
@@ -129,15 +138,15 @@ func main() {
 
 	// ******** TRANSACTIONS GETS ********
 
-	// 13 - Get Incoming transactions
-	l, err := client.IncomingTransactions(address, "", "")
+	// 14 - Get Incoming transactions
+	m, err := client.IncomingTransactions(address, "", "")
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return
 	}
-	fmt.Printf("Incoming transactions:\n%s", utils.Struc2Json(l))
+	fmt.Printf("Incoming transactions:\n%s", utils.Struc2Json(m))
 
-	// 14 - Get Outgoing transactions
+	// 15 - Get Outgoing transactions
 	n, err := client.OutgoingTransactions(address, "", "")
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
@@ -145,56 +154,56 @@ func main() {
 	}
 	fmt.Printf("Outgoing transactions:\n%s", utils.Struc2Json(n))
 
-	// 15 - Gets the array of transactions for which an account is the sender or receiver
+	// 16 - Gets the array of transactions for which an account is the sender or receiver
 	// and which have not yet been included in a block.
-	m, err := client.UnconfirmedTransactions(address)
+	o, err := client.UnconfirmedTransactions(address)
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return
 	}
-	fmt.Println(utils.Struc2Json(m))
+	fmt.Println(utils.Struc2Json(o))
 
-	// 16 - Gets all transactions of an account.
-	o, err := client.AllTransactions(address, "", "")
+	// 17 - Gets all transactions of an account.
+	p, err := client.AllTransactions(address, "", "")
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return
 	}
-	fmt.Printf("Outgoing transactions:\n%s", utils.Struc2Json(o))
+	fmt.Printf("Outgoing transactions:\n%s", utils.Struc2Json(p))
 
 	// ******** VARIOUS GETS ********
 
-	// 17 - Get chain height
-	p, err := client.Height()
-	if err != nil {
-		fmt.Println(utils.Struc2Json(err))
-		return
-	}
-	fmt.Printf("Harvested blocks:\n%s", utils.Struc2Json(p))
-
-	// 18 - Get the current last block of the chain.
-	q, err := client.LastBlock()
+	// 18 - Get chain height
+	q, err := client.Height()
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return
 	}
 	fmt.Printf("Harvested blocks:\n%s", utils.Struc2Json(q))
 
-	// 19 - Get information about the maximum number of allowed harvesters and
-	// how many harvesters are already using the node.
-	r, err := client.UnlockInfo()
+	// 19 - Get the current last block of the chain.
+	r, err := client.LastBlock()
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return
 	}
-	fmt.Printf("UnlockInfo:\n%s", utils.Struc2Json(r))
+	fmt.Printf("Harvested blocks:\n%s", utils.Struc2Json(r))
 
-	// 20 - Gets the AccountMetaDataPair of the account for which the given account is the delegate account.
-	s, err := client.Forwarded(address)
+	// 20 - Get information about the maximum number of allowed harvesters and
+	// how many harvesters are already using the node.
+	s, err := client.UnlockInfo()
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return
 	}
-	fmt.Printf("Forwarded:\n%s", utils.Struc2Json(s))
+	fmt.Printf("UnlockInfo:\n%s", utils.Struc2Json(s))
+
+	// 21 - Gets the AccountMetaDataPair of the account for which the given account is the delegate account.
+	t, err := client.Forwarded(address)
+	if err != nil {
+		fmt.Println(utils.Struc2Json(err))
+		return
+	}
+	fmt.Printf("Forwarded:\n%s", utils.Struc2Json(t))
 
 }

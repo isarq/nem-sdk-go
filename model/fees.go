@@ -3,7 +3,11 @@ package model
 import (
 	"github.com/isarq/nem-sdk-go/base"
 	"github.com/isarq/nem-sdk-go/extras"
+	"github.com/isarq/nem-sdk-go/utils"
+
+	"errors"
 	"math"
+	"strconv"
 )
 
 // The Fee structure's base fee
@@ -64,6 +68,53 @@ func CalculateMessage(message base.Message, isHW bool) float64 {
 		length = 32 + 16 + math.Ceil(float64(length/16))*16
 	}
 	return CurrentFeeFactor * math.Floor(length)
+}
+
+// Calculate fees for mosaics included in a transfer transaction
+// param multiplier - A quantity multiplier
+// param mosaics - A mosaicDefinitionMetaDataPair struct
+// param attachedMosaics - An array of mosaics to send
+// return - The fee amount for the mosaics in the transaction
+func CalculateMosaics(multiplier float64, mosaics map[string]base.MosaicDefinition,
+	attachedMosaics []base.Mosaic, supplys map[string]float64) float64 {
+	var totalFee float64
+	var fee float64
+	var supplyRelatedAdjustment float64
+	for _, m := range attachedMosaics {
+		mosaicName := utils.MosaicIdToName(m.MosaicID)
+		//fmt.Println("mosaicName: ", mosaicName)
+		if extras.IsEmpty(mosaics[mosaicName]) {
+			err := errors.New("unknown mosaic divisibility")
+			panic(err)
+		}
+		mosaicDefinitionMetaDataPair := mosaics[mosaicName]
+		properties := utils.Grep(mosaicDefinitionMetaDataPair.Properties)
+
+		divisibilityProperties := properties["divisibility"]
+		divisibility, _ := strconv.ParseFloat(divisibilityProperties, 64)
+
+		supply := supplys[mosaicName]
+
+		quantity := m.Quantity
+		if supply <= 10000 && divisibility == 0 {
+			//fmt.Println("Small Business Mosaic: 1")
+			fee = CurrentFeeFactor
+		} else {
+			maxMosaicQuantity := float64(9000000000000000)
+
+			totalMosaicQuantity := supply * math.Pow(10, divisibility)
+
+			supplyRelatedAdjustment = math.Floor(0.8 * math.Log(maxMosaicQuantity/totalMosaicQuantity))
+			numNem := CalculateXemEquivalent(multiplier, quantity, supply, divisibility)
+			// Using Math.ceil below because xem equivalent returned is sometimes a bit lower than it should
+			// Ex: 150'000 of nem:xem gives 149999.99999999997
+			fee = CalculateMinimum(math.Ceil(numNem))
+		}
+
+		totalFee += CurrentFeeFactor * math.Max(1, fee-supplyRelatedAdjustment)
+		//fmt.Println("totalFee: ", totalFee)
+	}
+	return totalFee
 }
 
 // Calculate fees from an amount of XEM

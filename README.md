@@ -22,6 +22,7 @@ NEM Developer Kit for Golang based on https://github.com/QuantumMechanics/NEM-sd
   - Gets an array of mosaic objects for a given account address.
   - Gets an array of mosaic definition objects for a given account address.
   - Gets mosaics definitions of a namespace or sub-namespace.
+  - Get mosaic Supply.
 ### Namespace gets
   - Gets an array of namespace objects for a given account address.
 ### Harvesting gets
@@ -38,12 +39,12 @@ NEM Developer Kit for Golang based on https://github.com/QuantumMechanics/NEM-sd
  
 # types of transactions!
   - Simple transactions.
+  - Mosaic transactions.
   - Create mosaic.
   - Create namespace.
   - Multi-signature transactions.
   ### Other functions.
  - Create private keys.
- - Create key pairs.
  - Create key pairs.
  - Extract public key from key pair.
  - Verify a signature.
@@ -52,7 +53,6 @@ NEM Developer Kit for Golang based on https://github.com/QuantumMechanics/NEM-sd
  - Verify if address is from given network.
  - More.
 # features in development!
- - Mosaic transactions.
   - WebSocket
 
 ### Installation

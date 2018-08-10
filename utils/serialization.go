@@ -219,75 +219,6 @@ func serializeMosaicDefinition(entity base.MosaicDefinition) []byte {
 	return data
 }
 
-// Serialize a transaction object
-// param entity - A transaction struct
-// return The serialized transaction
-//func SerializeTransaction(entity interface{}) []byte {
-//	var data []byte
-//	var gettype int
-//	switch entity.(type) {
-//	case *base.ProvisionNamespaceTransaction:
-//		s, _ := entity.(*base.ProvisionNamespaceTransaction)
-//		gettype = s.Type
-//	case *base.MosaicDefinitionCreationTransaction:
-//		s, _ := entity.(*base.MosaicDefinitionCreationTransaction)
-//		gettype = s.Type
-//	}
-//	fmt.Println("Type: ", gettype)
-//
-//	switch gettype {
-//	// Mosaic Definition Creation transaction
-//	case Mosaicdefinition:
-//		fmt.Println("Mosaicdefinition")
-//
-//		tx, _ := entity.(*base.MosaicDefinitionCreationTransaction)
-//		common, _ := commonHeader(tx)
-//		data = common
-//		s := tx.GetMosaicTx()
-//		temp := serializeMosaicDefinition(s.GetMosaic())
-//
-//		data = append(data, encodeByte4(len(temp))...)
-//
-//		data = append(data, temp...)
-//
-//		temp = serializeSafeString(s.CreationFeeSink)
-//		data = append(data, temp...)
-//
-//		temp = serializeLong(s.CreationFee)
-//		data = append(data, temp...)
-//
-//	// Provision Namespace transaction
-//	case ProvisionNamespace:
-//		fmt.Println("ProvisionNamespace")
-//		tx, _ := entity.(*base.ProvisionNamespaceTransaction)
-//		fmt.Println(tx.RentalFeeSink)
-//		common, _ := commonHeader(tx)
-//		data = common
-//
-//		data = append(data, encodeByte4(len(tx.RentalFeeSink))...)
-//		// TODO: check that len(entity.RentalFee) is always 40 bytes
-//		data = append(data, tx.RentalFeeSink...)
-//
-//		data = append(data, encodeByte4(tx.RentalFee)...)
-//		data = append(data, encodeByte4(math.Floor(tx.RentalFee/0x100000000))...)
-//		temp := serializeSafeString(tx.NewPart)
-//
-//		data = append(data, temp...)
-//		temp = serializeSafeString(tx.Parent)
-//		data = append(data, temp...)
-//	// Multisig wrapped transaction
-//	case MultisigSignature:
-//		fmt.Println("MultisigSignature")
-//		tx, _ := entity.(*base.MultisigTransaction)
-//		common, _ := commonHeader(tx)
-//		data = common
-//		temp := SerializeTransaction(tx.OtherTrans)
-//		data = append(data, encodeByte4(temp)...)
-//		data = append(data, temp...)
-//	}
-//	return data
-//}
-
 // Serialize a transaction struct
 // param entity - A transaction struct
 // return The serialized transaction
@@ -322,6 +253,13 @@ func SerializeTransaction(entity interface{}) []byte {
 			data = append(data, msg...) // msg payload 27
 		} else {
 			data = append(data, encodeByte4(0)...)
+		}
+
+		entityVersion := tx.Version & 0xffffff
+
+		if entityVersion >= 2 {
+			temp := serializeMosaics(tx.Mosaics)
+			data = append(data, temp...)
 		}
 
 	// Mosaic Definition Creation transaction

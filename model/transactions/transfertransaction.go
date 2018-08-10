@@ -2,11 +2,12 @@ package transactions
 
 import (
 	"errors"
+	"fmt"
 	"github.com/isarq/nem-sdk-go/base"
+	"github.com/isarq/nem-sdk-go/com/requests"
 	"github.com/isarq/nem-sdk-go/extras"
 	"github.com/isarq/nem-sdk-go/model"
 	"github.com/isarq/nem-sdk-go/utils"
-
 	"math"
 	"strings"
 )
@@ -103,9 +104,11 @@ func (r *Transfer) Prepare(common Common, network int) base.TxDict {
 // param network - A network id
 // return - A [TransferTransaction] struct ready for serialization
 // link http://bob.nem.ninja/docs/#transferTransaction
-func (r *Transfer) PrepareMosaic(common Common, network int) base.TxDict {
+func (r *Transfer) PrepareMosaic(common Common, mosaicDefinitionMetaDataPair map[string]base.MosaicDefinition,
+	client requests.Client, network int) base.TxDict {
+	supplys := make(map[string]float64)
 	var msc txPrepare
-	if extras.IsEmpty(common) || extras.IsEmpty(network) {
+	if extras.IsEmpty(common) || extras.IsEmpty(network) || extras.IsEmpty(mosaicDefinitionMetaDataPair) {
 		err := errors.New("missing parameter !")
 		panic(err)
 	}
@@ -132,11 +135,27 @@ func (r *Transfer) PrepareMosaic(common Common, network int) base.TxDict {
 
 	msc.msgFee = model.CalculateMessage(msc.message, false)
 
+	//Gets the current supply of a mosaic
+	for _, b := range r.Mosaics {
+		fullMosaicName := utils.MosaicIdToName(b.MosaicID)
+		supply, err := client.Supply(fullMosaicName)
+		if err != nil {
+			fmt.Println(utils.Struc2Json(err))
+		}
+		supplys[fullMosaicName] = float64(supply.Supply)
+	}
+
+	msc.mosaicsFee = model.CalculateMosaics(msc.amount, mosaicDefinitionMetaDataPair, r.Mosaics, supplys)
+
 	if network == model.Data.Testnet.ID {
 		msc.due = 60
 	} else {
 		msc.due = 24 * 60
 	}
+	msc.mosaics = r.Mosaics
+
+	//msc.mosaicsFee = model.Ca
+
 	msc.network = network
 
 	rt := constructtx(msc)

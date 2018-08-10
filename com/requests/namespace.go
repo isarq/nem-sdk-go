@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/isarq/nem-sdk-go/base"
+	"github.com/isarq/nem-sdk-go/utils"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -16,6 +18,8 @@ type NamespaceMetaDataPair struct {
 	Meta      Meta      `json:"meta"`
 	Namespace Namespace `json:"namespace"`
 }
+
+var algo base.MosaicDefinition
 
 type Meta struct {
 	ID int `json:"id"`
@@ -147,4 +151,22 @@ func (c *Client) Namespaceinfo(id string) (Namespace, error) {
 		return Namespace{}, err
 	}
 	return data, nil
+}
+
+// Search for mosaic definition(s) into an array of mosaicDefinition objects
+// param mosaicDefinitionArray - An array of mosaicDefinition objects
+// param keys - Array of strings with names of the mosaics to find (['eur', 'usd',...])
+// return - An object of mosaicDefinition objects
+func SearchMosaicDefinitionArray(mosaicDefinitionArray []MosaicDefinitionMetaDataPair,
+	keys []string) map[string]base.MosaicDefinition {
+	rest := make(map[string]base.MosaicDefinition)
+	for _, b := range keys {
+		for _, c := range mosaicDefinitionArray {
+			if c.Mosaic.ID.Name == b {
+				m := utils.MosaicIdToName(c.Mosaic.ID)
+				rest[m] = c.Mosaic
+			}
+		}
+	}
+	return rest
 }

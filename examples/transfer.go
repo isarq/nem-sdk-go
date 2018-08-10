@@ -29,6 +29,7 @@ func main() {
 
 	// Prepare the transfer transaction
 	transactionEntity := tx.Prepare(common, model.Data.Testnet.ID)
+	fmt.Println(utils.Struc2Json(transactionEntity))
 
 	res, err := transactions.Send(common, transactionEntity, client)
 	if err != nil {

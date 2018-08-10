@@ -81,3 +81,17 @@ func IsHexadecimal(str string) bool {
 func CreateNEMTimeStamp() int64 {
 	return int64(time.Now().Unix()) - 1427587585
 }
+
+// Mimics jQuery's grep function
+func Grep(item []base.Properties) map[string]string {
+	pro := make(map[string]string)
+	for _, p := range item {
+		pro[p.Name] = p.Value
+	}
+	//for _, p := range item {
+	//	if p.Name == "divisibility" {
+	//		return p
+	//	}
+	//}
+	return pro
+}
