@@ -20,7 +20,6 @@ func main() {
 	// Create variable to store our mosaic definitions,
 	// needed to calculate fees properly (already contains xem definition)
 	mosaicDefinitionMetaDataPair := objects.MosaicDefinitionMetadataPair()
-	fmt.Sprint(mosaicDefinitionMetaDataPair)
 	// Create an un-prepared mosaic transfer transaction struct
 	// (use same object as transfer tansaction)
 	tx := objects.Transfer("TCSBBN-7XUDLR-OZXZYJ-RCDZQC-33T3HE-FM3B4E-SESM", 1, "")
