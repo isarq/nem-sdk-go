@@ -137,6 +137,7 @@ func serializeProperties(entity []base.Properties) []byte {
 
 		serializedProperty := serializeProperty(entity)
 		data = append(data, serializedProperty...)
+		//fmt.Printf("CANTIDAD: %v \n", data)
 	}
 	return data
 }
@@ -184,21 +185,29 @@ func serializeMosaicDefinition(entity base.MosaicDefinition) []byte {
 	// Length of creator's public key byte array (always 32): 4 bytes (integer).
 	// Always: 0x20, 0x00, 0x00, 0x00
 	data = append(data, encodeByte4(len(Creator))...)
-
+	//fmt.Printf("Len_Creator: 0x%v \n", hex.EncodeToString(encodeByte4(len(Creator))))
 	// Public key bytes of creator: 32 bytes.
 	data = append(data, Creator...)
-
+	//fmt.Println("Creator: ", Creator)
+	//fmt.Println("Creator: ", len(Creator))
+	//fmt.Printf("Creator: 0x%v \n", hex.EncodeToString([]byte(Creator)))
 	serializedMosaicId := serializeMosaicId(entity.ID)
+	//fmt.Println("serializedMosaicId: ", len(serializedMosaicId))
 
 	// Length of mosaic id structure: 4 bytes (integer).
 	// Example: 0x0e, 0x00, 0x00, 0x00
 	data = append(data, serializedMosaicId...)
+	//fmt.Printf("Len_Mosaic_Id_Struct: 0x%v \n", hex.EncodeToString(encodeByte4(len(serializedMosaicId))))
+	//
+	//data = append(data, encodeByte4(serializedMosaicId)...)
+	//fmt.Println("DATA 04: ", data)
 	// Length of mosaic name string
 	// Example: 0x15, 0x00, 0x00, 0x00
 
 	// Mosaic name string: UTF8 encoded string.
 	utf8ToUa := Hex2Bt(Utf8ToHex(entity.Description))
 	temp := serializeUaString(utf8ToUa)
+	//fmt.Println("utf8ToUa: ", utf8ToUa)
 	data = append(data, temp...)
 
 	temp = serializeProperties(entity.Properties)
@@ -218,6 +227,7 @@ func SerializeTransaction(entity interface{}) []byte {
 
 	switch entity.(type) {
 	case *base.TransferTransaction:
+		//fmt.Println("TransferTransaction")
 		tx, _ := entity.(*base.TransferTransaction)
 		common, _ := commonHeader(tx)
 		data = common
@@ -254,6 +264,7 @@ func SerializeTransaction(entity interface{}) []byte {
 
 	// Mosaic Definition Creation transaction
 	case *base.MosaicDefinitionCreationTransaction:
+		//fmt.Println("Mosaicdefinition")
 
 		tx, _ := entity.(*base.MosaicDefinitionCreationTransaction)
 		common, _ := commonHeader(tx)
@@ -273,6 +284,7 @@ func SerializeTransaction(entity interface{}) []byte {
 
 		// Provision Namespace transaction
 	case *base.ProvisionNamespaceTransaction:
+		//fmt.Println("ProvisionNamespace")
 		tx, _ := entity.(*base.ProvisionNamespaceTransaction)
 
 		common, _ := commonHeader(tx)
@@ -293,6 +305,7 @@ func SerializeTransaction(entity interface{}) []byte {
 
 		// Multisig wrapped transaction
 	case *base.MultisigTransaction:
+		//fmt.Println("MultisigSignature")
 		tx, _ := entity.(*base.MultisigTransaction)
 		common, _ := commonHeader(tx)
 		data = common
