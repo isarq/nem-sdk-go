@@ -171,6 +171,20 @@ type MultisigSignatureTransaction struct {
 	OtherAccount string `json:"otherAccount"`
 }
 
+type TransactionResponce struct {
+	TimeStamp  int64                          `json:"timeStamp"`
+	Amount     float64                        `json:"amount"`
+	Fee        float64                        `json:"fee"`
+	Recipient  string                         `json:"recipient,omitempty"`
+	Type       int                            `json:"type,omitempty"`
+	Deadline   int64                          `json:"deadline"`
+	Message    *Message                       `json:"message,omitempty"`
+	Version    int                            `json:"version,omitempty"`
+	Signer     string                         `json:"signer,omitempty"`
+	OtherTrans Transaction                    `json:"otherTrans,omitempty"`
+	Signatures []MultisigSignatureTransaction `json:"signatures,omitempty"`
+}
+
 type MultisigTransaction struct {
 	TimeStamp  int64                          `json:"timeStamp"`
 	Fee        float64                        `json:"fee"`
@@ -183,15 +197,15 @@ type MultisigTransaction struct {
 }
 
 type Transaction struct {
-	TimeStamp int64    `json:"timeStamp"`
-	Amount    float64  `json:"amount"`
-	Fee       float64  `json:"fee"`
-	Recipient string   `json:"recipient"`
+	TimeStamp int64    `json:"timeStamp,omitempty"`
+	Amount    float64  `json:"amount,omitempty"`
+	Fee       float64  `json:"fee,omitempty"`
+	Recipient string   `json:"recipient,omitempty"`
 	Type      int      `json:"type,omitempty"`
-	Deadline  int64    `json:"deadline"`
+	Deadline  int64    `json:"deadline,omitempty"`
 	Message   *Message `json:"message,omitempty"`
-	Version   int      `json:"version"`
-	Signer    string   `json:"signer"`
+	Version   int      `json:"version,omitempty"`
+	Signer    string   `json:"signer,omitempty"`
 }
 
 type Tx interface {
@@ -293,15 +307,17 @@ func (t *MultisigTransaction) GetCommon() CommonTransaction {
 }
 
 func (t *MultisigTransaction) GetTx() Transaction {
+	tx := t.OtherTrans.(Transaction)
 	return Transaction{
-		TimeStamp: t.TimeStamp,
-		Amount:    0,
-		Fee:       t.Fee,
-		Recipient: "",
-		Type:      t.Type,
-		Deadline:  t.Deadline,
-		Version:   t.Version,
-		Signer:    t.Signer,
+		TimeStamp: tx.TimeStamp,
+		Amount:    tx.Amount,
+		Fee:       tx.Fee,
+		Recipient: tx.Recipient,
+		Type:      tx.Type,
+		Deadline:  tx.Deadline,
+		Version:   tx.Version,
+		Signer:    tx.Signer,
+		Message:   tx.Message,
 	}
 }
 
@@ -325,7 +341,7 @@ func (t *TransferTransaction) GetTx() Transaction {
 		TimeStamp: t.TimeStamp,
 		Amount:    0,
 		Fee:       t.Fee,
-		Recipient: "",
+		Recipient: t.Recipient,
 		Type:      t.Type,
 		Deadline:  t.Deadline,
 		Version:   t.Version,
@@ -353,7 +369,7 @@ func (t *Transaction) GetTx() Transaction {
 		TimeStamp: t.TimeStamp,
 		Amount:    0,
 		Fee:       t.Fee,
-		Recipient: "",
+		Recipient: t.Recipient,
 		Type:      t.Type,
 		Deadline:  t.Deadline,
 		Version:   t.Version,
