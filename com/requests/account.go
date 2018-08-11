@@ -85,8 +85,8 @@ type TransactionMetaData struct {
 
 // Transactions meta data object contains additional information about the transaction.
 type TransactionMetaDataPair struct {
-	Meta        TransactionMetaData `json:"meta"`
-	Transaction base.Transaction    `json:"transaction"`
+	Meta        TransactionMetaData      `json:"meta"`
+	Transaction base.TransactionResponce `json:"transaction"`
 }
 
 // The unconfirmed transaction meta data contains the hash of the inner transaction in case the transaction
