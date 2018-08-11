@@ -30,6 +30,7 @@ NEM Developer Kit for Golang based on https://github.com/QuantumMechanics/NEM-sd
   - Starts harvesting.
   - Stop harvesting.
 ### Various gets
+  - Apostille audit.
   - Get chain height.
   - Get the current last block of the chain.
   - Get information about the maximum number of allowed harvesters and
@@ -42,6 +43,7 @@ NEM Developer Kit for Golang based on https://github.com/QuantumMechanics/NEM-sd
   - Mosaic transactions.
   - Create mosaic.
   - Create namespace.
+  - Apostille create.
   - Multi-signature transactions.
   ### Other functions.
  - Create private keys.
@@ -54,7 +56,6 @@ NEM Developer Kit for Golang based on https://github.com/QuantumMechanics/NEM-sd
  - More.
 # features in development!
   - WebSocket.
-  - Apostille support.
 
 ### Installation
 
