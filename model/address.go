@@ -82,7 +82,7 @@ func ToAddress(publicKey string, networkId int) string {
 func KeyPairCreate(pk string) KeyPair {
 	if pk != "" {
 		if len(pk) != 64 {
-			err := fmt.Errorf("insufficient seed length, should be %d, but got %d", PrivateBytes, len(pk))
+			err := fmt.Errorf("insufficient seed length, should be %d, but got %d", 64, len(pk))
 			panic(err)
 		}
 		seed, err := hex.DecodeString(strings.TrimSpace(pk))
@@ -114,7 +114,7 @@ func KeyPairCreate(pk string) KeyPair {
 func FromSeed(seed []byte) (KeyPair, error) {
 	if len(seed) != PrivateBytes {
 		return KeyPair{},
-			fmt.Errorf("insufficient seed length, should be %d, but got %d", PrivateBytes, len(seed))
+			fmt.Errorf("insufficient seed length, should be %d, but got %d", 64, len(seed))
 	}
 	pub, pr, err := ed25519.GenerateKey(bytes.NewReader(seed))
 	if err != nil {
