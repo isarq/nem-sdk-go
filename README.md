@@ -55,6 +55,7 @@ NEM Developer Kit for Golang based on https://github.com/QuantumMechanics/NEM-sd
  - Verify if address is from given network.
  - More.
 # features in development!
+  - Type 2 messages (encrypted messages)
   - WebSocket.
 
 ### Installation
