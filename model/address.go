@@ -118,7 +118,7 @@ func FromSeed(seed []byte) (KeyPair, error) {
 	}
 	pub, pr, err := ed25519.GenerateKey(bytes.NewReader(seed))
 	if err != nil {
-		panic(err)
+		return KeyPair{}, err
 	}
 	return KeyPair{pr[:PrivateBytes], pub}, nil
 }
