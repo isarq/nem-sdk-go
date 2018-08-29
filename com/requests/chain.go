@@ -43,10 +43,13 @@ type PrevBlockHash struct {
 	Data string `json:"data"`
 }
 
-func NewClient(node Node) Client {
+func NewClient(node Node) *Client {
+	c := new(Client)
 	host := utils.FormatEndpoint(node)
 	host = strings.Replace(host, "http://", "", -1)
-	return Client{Node: node, URL: url.URL{Scheme: "http", Host: host}}
+	c.Node = node
+	c.URL = url.URL{Scheme: "http", Host: host}
+	return c
 }
 
 // Gets the current height of the block chain.
