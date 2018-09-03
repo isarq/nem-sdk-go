@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// Create keypair
-	kp := model.KeyPairCreate("")
+	kp, _ := model.KeyPairCreate("")
 
 	// Data to sign
 	data := "NEM is awesome !"

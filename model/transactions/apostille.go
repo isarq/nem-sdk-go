@@ -106,7 +106,7 @@ func Create(common Common, fileName string, fileContent []byte, tags string, has
 	var apostilleHash string
 	if isPrivate {
 		// Create user keypair
-		kp := model.KeyPairCreate(common.PrivateKey)
+		kp, _ := model.KeyPairCreate(common.PrivateKey)
 		// Create the dedicated account
 		dedicatedAccount = generateAccount(common, fileName, network)
 
@@ -120,7 +120,8 @@ func Create(common Common, fileName string, fileContent []byte, tags string, has
 		dataHash := hash[8:]
 
 		// Set checksum + signed hash as message
-		apostilleHash = checksum + utils.Bt2Hex(kp.Sign(dataHash))
+		signed, _ := kp.Sign([]byte(dataHash))
+		apostilleHash = checksum + utils.Bt2Hex(signed)
 
 	} else {
 		dedicatedAccount.Address = strings.ToUpper(strings.Replace(model.Apostille[network], "-", "", -1))
@@ -136,7 +137,7 @@ func Create(common Common, fileName string, fileContent []byte, tags string, has
 	// Set message type to hexadecimal
 	transaction.MessageType = 0
 	// Prepare the transfer transaction object
-	transactionEntity := transaction.Prepare(common, network)
+	transactionEntity, _ := transaction.Prepare(common, network)
 	//fmt.Printf("%s", utils.Struc2Json(transactionEntity))
 
 	return Apostilledata{
@@ -239,18 +240,18 @@ func isSigned(hashingByte string) bool {
 // return - An object containing address and private key of the dedicated account
 func generateAccount(common Common, fileName string, network int) Dedicated {
 	// Create user keypair
-	kp := model.KeyPairCreate(common.PrivateKey)
+	kp, _ := model.KeyPairCreate(common.PrivateKey)
 
 	// Create recipient account from signed sha256 hash of new filename
 	hasher := sha256.New()
 	hasher.Write([]byte(fileName))
-	signedFilename := kp.Sign(utils.Bt2Hex(hasher.Sum(nil)))
+	signedFilename, _ := kp.Sign([]byte(utils.Bt2Hex(hasher.Sum(nil))))
 
 	// Truncate signed file name to get a 32 bytes private key
 	dedicatedAccountPrivateKey := utils.FixPrivateKey(utils.Bt2Hex(signedFilename))
 
 	// Create dedicated account key pair
-	dedicatedAccountKeyPair := model.KeyPairCreate(common.PrivateKey)
+	dedicatedAccountKeyPair, _ := model.KeyPairCreate(common.PrivateKey)
 
 	return Dedicated{
 		Address:    model.ToAddress(dedicatedAccountKeyPair.PublicString(), network),
