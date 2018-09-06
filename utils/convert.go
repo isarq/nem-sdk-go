@@ -21,7 +21,7 @@ func Hex2BaReversed(hexx string) []byte {
 	return output
 }
 
-// Convert hex to []Bytes
+// Convert hex to []Bytes.
 // param hexx - An hex string
 // return bytes
 func Hex2Bt(hexx string) []byte {
