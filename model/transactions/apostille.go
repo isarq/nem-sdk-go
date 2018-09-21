@@ -253,8 +253,9 @@ func generateAccount(common Common, fileName string, network int) Dedicated {
 	// Create dedicated account key pair
 	dedicatedAccountKeyPair, _ := model.KeyPairCreate(common.PrivateKey)
 
+	address, _ := model.ToAddress(dedicatedAccountKeyPair.PublicString(), network)
 	return Dedicated{
-		Address:    model.ToAddress(dedicatedAccountKeyPair.PublicString(), network),
+		Address:    address,
 		PrivateKey: dedicatedAccountPrivateKey,
 	}
 }
