@@ -224,6 +224,7 @@ type TransactionResponse struct {
 	Message    *Message                        `json:"message,omitempty"`
 	Version    int                             `json:"version,omitempty"`
 	Signer     string                          `json:"signer,omitempty"`
+	Mosaics    []Mosaic                        `json:"mosaics,omitempty"`
 	OtherTrans Transaction                     `json:"otherTrans,omitempty"`
 	Signatures []MultiSignSignatureTransaction `json:"signatures,omitempty"`
 }
