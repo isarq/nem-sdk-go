@@ -30,13 +30,13 @@ func Send(common Common, entity interface{}, endpoint *requests.Client) (*reques
 	}
 	kp, err := model.KeyPairCreate(common.PrivateKey)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
 
 	result := utils.SerializeTransaction(entity)
 	signature, err := kp.Sign(result)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
 
 	obj := requests.RequestAnnounce{

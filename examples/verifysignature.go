@@ -15,7 +15,7 @@ func main() {
 	data := "NEM is awesome !"
 
 	// Sign data
-	sig := kp.Sign(data)
+	sig, _ := kp.Sign([]byte(data))
 
 	// Review
 	fmt.Println("Public key: ", kp.PublicString())
