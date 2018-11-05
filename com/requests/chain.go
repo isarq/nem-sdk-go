@@ -3,13 +3,14 @@ package requests
 import (
 	"encoding/json"
 	"errors"
-	. "github.com/isarq/nem-sdk-go/base"
-	"github.com/isarq/nem-sdk-go/utils"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	. "github.com/isarq/nem-sdk-go/base"
+	"github.com/isarq/nem-sdk-go/utils"
 )
 
 // BlockHeight contains a chain height
@@ -43,13 +44,23 @@ type PrevBlockHash struct {
 	Data string `json:"data"`
 }
 
+type ExplorerBlockViewModel struct {
+	Txes       []ExplorerTransferViewModel `json:"txes"`
+	Block      Block                       `json:"block"`
+	Hash       string                      `json:"hash"`
+	Difficulty int                         `json:"difficulty"`
+}
+
+type ExplorerTransferViewModel struct {
+	Tx        TransactionResponce `json:"tx"`
+	Hash      string              `json:"hash"`
+	InnerHash string              `json:"innerHash"`
+}
+
 func NewClient(node Node) *Client {
-	c := new(Client)
 	host := utils.FormatEndpoint(node)
 	host = strings.Replace(host, "http://", "", -1)
-	c.Node = node
-	c.URL = url.URL{Scheme: "http", Host: host}
-	return c
+	return &Client{Node: node, URL: url.URL{Scheme: "http", Host: host}}
 }
 
 // Gets the current height of the block chain.
@@ -190,4 +201,46 @@ func (c *Client) BlockByHeight(height int64) (Block, error) {
 		return Block{}, err
 	}
 	return data, nil
+}
+
+// Gets part of a chain
+// param Client - An Client endpoint struct point
+// param height - The height of the block
+// return - A array of ExplorerBlockViewModel struct
+// link https://nemproject.github.io/#getting-part-of-a-chain
+func (c *Client) BlockAfterByHeight(height int64) ([]ExplorerBlockViewModel, error) {
+	timeout := time.Duration(10 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+
+	payload, err := json.Marshal(map[string]int64{"height": height})
+	if err != nil {
+		return []ExplorerBlockViewModel{}, err
+	}
+
+	c.URL.Path = "/local/chain/blocks-after"
+	req, err := c.buildReq(nil, payload, http.MethodPost)
+	if err != nil {
+		return []ExplorerBlockViewModel{}, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		return []ExplorerBlockViewModel{}, err
+	}
+	defer resp.Body.Close()
+	byteArray, err := ioutil.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		err := errors.New(string(byteArray))
+		return []ExplorerBlockViewModel{}, err
+	}
+
+	var data struct {
+		Datas []ExplorerBlockViewModel `json:"data"`
+	}
+	if err := json.Unmarshal(byteArray, &data); err != nil {
+		return []ExplorerBlockViewModel{}, err
+	}
+	return data.Datas, nil
 }
