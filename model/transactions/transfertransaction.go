@@ -105,7 +105,7 @@ func (r *Transfer) Prepare(common Common, network int) base.TxDict {
 // return - A [TransferTransaction] struct ready for serialization
 // link http://bob.nem.ninja/docs/#transferTransaction
 func (r *Transfer) PrepareMosaic(common Common, mosaicDefinitionMetaDataPair map[string]base.MosaicDefinition,
-	client requests.Client, network int) base.TxDict {
+	client *requests.Client, network int) base.TxDict {
 	supplys := make(map[string]float64)
 	var msc txPrepare
 	if extras.IsEmpty(common) || extras.IsEmpty(network) || extras.IsEmpty(mosaicDefinitionMetaDataPair) {
