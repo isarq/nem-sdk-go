@@ -317,7 +317,7 @@ func SerializeTransaction(entity interface{}) []byte {
 	return data
 }
 
-func commonHeader(txstruct base.TxDict) (ch []byte, err error) {
+func commonHeader(txstruct base.Transaction) (ch []byte, err error) {
 	var data []byte
 	tx := txstruct.GetCommon()
 	Signer, _ := hex.DecodeString(tx.Signer)

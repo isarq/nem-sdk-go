@@ -44,17 +44,13 @@ func (t *Transfer) GetType() int {
 	return 0
 }
 
-func (t *Transfer) GetTx() base.Transaction {
-	return base.Transaction{}
-}
-
 // Prepare a transfer transaction struct
 // param common - A common struct
 // param r - An un-prepared TransferTransaction method
 // param network - A network id
 // return - A [TransferTransaction] struct
 // link http://bob.nem.ninja/docs/#transferTransaction
-func (r *Transfer) Prepare(common Common, network int) base.TxDict {
+func (r *Transfer) Prepare(common Common, network int) base.Transaction {
 	var msc txPrepare
 	if extras.IsEmpty(common) || extras.IsEmpty(network) {
 		err := errors.New("missing parameter !")
@@ -105,7 +101,7 @@ func (r *Transfer) Prepare(common Common, network int) base.TxDict {
 // return - A [TransferTransaction] struct ready for serialization
 // link http://bob.nem.ninja/docs/#transferTransaction
 func (r *Transfer) PrepareMosaic(common Common, mosaicDefinitionMetaDataPair map[string]base.MosaicDefinition,
-	client *requests.Client, network int) base.TxDict {
+	client *requests.Client, network int) base.Transaction {
 	supplys := make(map[string]float64)
 	var msc txPrepare
 	if extras.IsEmpty(common) || extras.IsEmpty(network) || extras.IsEmpty(mosaicDefinitionMetaDataPair) {
@@ -187,16 +183,20 @@ func constructtx(msc txPrepare) *base.TransferTransaction {
 	totalFee := math.Floor((msc.msgFee + fee) * 1000000)
 
 	custom := base.TransferTransaction{
-		TimeStamp: data.TimeStamp,
+		CommonTransaction: base.CommonTransaction{
+			TimeStamp: data.TimeStamp,
+			Fee:       totalFee,
+			Version:   data.Version,
+			Signer:    data.Signer,
+			Type:      data.Type,
+			Deadline:  data.Deadline,
+		},
 		Amount:    msc.amount,
-		Fee:       totalFee,
 		Recipient: strings.ToUpper(strings.Replace(msc.recipientCompressedKey, "-", "", -1)),
-		Type:      data.Type,
-		Deadline:  data.Deadline,
-		Message:   msc.message,
-		Version:   data.Version,
-		Signer:    data.Signer,
-		Mosaics:   msc.mosaics,
+
+		Message: msc.message,
+
+		Mosaics: msc.mosaics,
 	}
 	return &custom
 }

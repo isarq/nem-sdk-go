@@ -1,5 +1,19 @@
 package base
 
+import (
+	"fmt"
+)
+
+type Tx interface {
+	GetTx() Transaction
+}
+
+type Transaction interface {
+	GetType() int
+	GetCommon() *CommonTransaction
+	String() string
+}
+
 type Error struct {
 	TimeStamp int64
 	Error     string
@@ -11,12 +25,7 @@ type Error struct {
 // definition of the mosaic has to be created and published to the network.
 // This is done via a mosaic definition creation transaction.
 type MosaicDefinitionCreationTransaction struct {
-	TimeStamp        int64            `json:"timeStamp"`
-	Fee              float64          `json:"fee"`
-	Type             int              `json:"type"`
-	Deadline         int64            `json:"deadline"`
-	Version          int              `json:"version"`
-	Signer           string           `json:"signer"`
+	CommonTransaction
 	CreationFee      float64          `json:"creationFee"`
 	CreationFeeSink  string           `json:"creationFeeSink"`
 	MosaicDefinition MosaicDefinition `json:"mosaicDefinition"`
@@ -36,6 +45,16 @@ type MosaicDefinition struct {
 type MosaicID struct {
 	NamespaceID string `json:"namespaceId,omitempty"`
 	Name        string `json:"name,omitempty"`
+}
+
+func (m MosaicID) String() string {
+	return fmt.Sprintf(
+		`{
+			"NamespaceID": %v,
+			"Name": %v }
+		`,
+		m.NamespaceID,
+		m.Name)
 }
 
 // A mosaic describes an instance of a mosaic definition.
@@ -73,16 +92,11 @@ type ConsModif struct {
 }
 
 type TransferTransaction struct {
-	TimeStamp int64    `json:"timeStamp,omitempty"`
+	CommonTransaction
 	Amount    float64  `json:"amount,omitempty"`
-	Signature string   `json:"signature,omitempty"`
-	Fee       float64  `json:"fee,omitempty"`
 	Recipient string   `json:"recipient,omitempty"`
-	Type      int      `json:"type,omitempty"`
-	Deadline  int64    `json:"deadline,omitempty"`
 	Message   Message  `json:"message,omitempty"`
-	Version   int      `json:"version,omitempty"`
-	Signer    string   `json:"signer,omitempty"`
+	Signature string   `json:"signature,omitempty"`
 	Mosaics   []Mosaic `json:"mosaics,omitempty"`
 }
 
@@ -122,6 +136,22 @@ type Supply struct {
 	MultisigAccount string `json:"multisigAccount"`
 }
 
+type MosaicsData struct {
+	Quantity int      `json:"quantity"`
+	MosaicID MosaicID `json:"mosaicId"`
+}
+
+func (m *MosaicsData) String() string {
+	return fmt.Sprintf(
+		`
+			"Quantity": %v,
+			"MosaicID": %v
+		`,
+		m.Quantity,
+		m.MosaicID.String(),
+	)
+}
+
 type MultisigAggregateModific struct {
 	Modifications   []interface{} `json:"modifications"`
 	RelativeChange  interface{}   `json:"relativeChange"`
@@ -145,13 +175,26 @@ type CommonTransaction struct {
 	Deadline  int64
 }
 
+func (c *CommonTransaction) String() string {
+	return fmt.Sprintf(
+		`
+			"Type": %v,
+			"Version": %v
+			"Signer": %v
+			"TimeStamp": %v
+			"Fee": %v
+			"Deadline": %v
+		`,
+		c.Type,
+		c.Version,
+		c.Signer,
+		c.TimeStamp,
+		c.Fee,
+		c.Deadline)
+}
+
 type ProvisionNamespaceTransaction struct {
-	TimeStamp     int64   `json:"timeStamp"`
-	Fee           float64 `json:"fee"`
-	Type          int     `json:"type"`
-	Deadline      int64   `json:"deadline"`
-	Version       int     `json:"version"`
-	Signer        string  `json:"signer"`
+	CommonTransaction
 	RentalFeeSink string  `json:"rentalFeeSink"`
 	RentalFee     float64 `json:"rentalFee"`
 	NewPart       string  `json:"newPart"`
@@ -186,17 +229,12 @@ type TransactionResponce struct {
 }
 
 type MultisigTransaction struct {
-	TimeStamp  int64                          `json:"timeStamp"`
-	Fee        float64                        `json:"fee"`
-	Type       int                            `json:"type"`
-	Deadline   int64                          `json:"deadline"`
-	Version    int                            `json:"version"`
-	Signer     string                         `json:"signer"`
+	CommonTransaction
 	OtherTrans interface{}                    `json:"otherTrans"`
 	Signatures []MultisigSignatureTransaction `json:"signatures,omitempty"`
 }
 
-type Transaction struct {
+type AbstractTransaction struct {
 	TimeStamp int64    `json:"timeStamp,omitempty"`
 	Amount    float64  `json:"amount,omitempty"`
 	Fee       float64  `json:"fee,omitempty"`
@@ -208,16 +246,50 @@ type Transaction struct {
 	Signer    string   `json:"signer,omitempty"`
 }
 
-type Tx interface {
-	GetType() int
-	GetTx() Transaction
+type TransactionMosaic struct {
+	AbstractTransaction
+	Signature string        `json:"signature"`
+	Mosaics   []MosaicsData `json:"mosaics"`
 }
 
-type TxDict interface {
-	GetCommon() CommonTransaction
-	//GetMosaic() MosaicDefinition
-	//GetMosaicId() MosaicID
-	//GetMosaicTx() *MosaicDefinitionCreationTransaction
+func (t *TransactionMosaic) GetType() int {
+	return t.Type
+}
+
+func (t *TransactionMosaic) GetCommon() *CommonTransaction {
+	return &CommonTransaction{
+		Type:      t.Type,
+		Version:   t.Version,
+		Signer:    t.Signer,
+		TimeStamp: t.TimeStamp,
+		Fee:       t.Fee,
+		Deadline:  t.Deadline,
+	}
+}
+
+func (t *TransactionMosaic) String() string {
+	return fmt.Sprintf(
+		`
+			"TimeStamp": %v,
+			"Amount": %v,
+			"Fee": %v,
+			"Recipient": %v,
+			"Type": %v,
+			"Deadline": %v,
+			"Message": %v,
+			"Version": %v,
+			"Signer": %v
+		`,
+		t.TimeStamp,
+		t.Amount,
+		t.Fee,
+		t.Recipient,
+		t.Type,
+		t.Deadline,
+		t.Message,
+		t.Version,
+		t.Signer,
+	)
 }
 
 func (t *MosaicDefinitionCreationTransaction) GetType() int {
@@ -225,8 +297,23 @@ func (t *MosaicDefinitionCreationTransaction) GetType() int {
 	return mosaic
 }
 
-func (t *MosaicDefinitionCreationTransaction) GetCommon() CommonTransaction {
-	return CommonTransaction{
+func (t *MosaicDefinitionCreationTransaction) String() string {
+	return fmt.Sprintf(
+		`
+			"Common": %v,
+			"CreationFee": %v,
+			"CreationFeeSink": %v,
+			"MosaicDefinition": %v
+		`,
+		t.CommonTransaction.String(),
+		t.CreationFee,
+		t.CreationFeeSink,
+		t.MosaicDefinition,
+	)
+}
+
+func (t *MosaicDefinitionCreationTransaction) GetCommon() *CommonTransaction {
+	return &CommonTransaction{
 		Type:      t.Type,
 		Version:   t.Version,
 		TimeStamp: t.TimeStamp,
@@ -251,24 +338,15 @@ func (t *MosaicDefinitionCreationTransaction) GetMosaicTx() *MosaicDefinitionCre
 }
 
 func (t *MosaicDefinitionCreationTransaction) GetTx() Transaction {
-	return Transaction{
-		TimeStamp: t.TimeStamp,
-		Amount:    0,
-		Fee:       t.Fee,
-		Recipient: "",
-		Type:      t.Type,
-		Deadline:  t.Deadline,
-		Version:   t.Version,
-		Signer:    t.Signer,
-	}
+	return t
 }
 
 func (t *ProvisionNamespaceTransaction) GetType() int {
 	return t.Type
 }
 
-func (t *ProvisionNamespaceTransaction) GetCommon() CommonTransaction {
-	return CommonTransaction{
+func (t *ProvisionNamespaceTransaction) GetCommon() *CommonTransaction {
+	return &CommonTransaction{
 		Type:      t.Type,
 		Version:   t.Version,
 		TimeStamp: t.TimeStamp,
@@ -278,25 +356,33 @@ func (t *ProvisionNamespaceTransaction) GetCommon() CommonTransaction {
 	}
 }
 
+func (t *ProvisionNamespaceTransaction) String() string {
+	return fmt.Sprintf(
+		`
+			"Common": %v,
+			"RentalFee": %v,
+			"RentalFeeSink": %v,
+			"Parent": %v,
+			"Parent": %v
+		`,
+		t.CommonTransaction.String(),
+		t.RentalFee,
+		t.RentalFeeSink,
+		t.Parent,
+		t.NewPart,
+	)
+}
+
 func (t *ProvisionNamespaceTransaction) GetTx() Transaction {
-	return Transaction{
-		TimeStamp: t.TimeStamp,
-		Amount:    0,
-		Fee:       t.Fee,
-		Recipient: "",
-		Type:      t.Type,
-		Deadline:  t.Deadline,
-		Version:   t.Version,
-		Signer:    t.Signer,
-	}
+	return t
 }
 
 func (t *MultisigTransaction) GetType() int {
 	return t.Type
 }
 
-func (t *MultisigTransaction) GetCommon() CommonTransaction {
-	return CommonTransaction{
+func (t *MultisigTransaction) GetCommon() *CommonTransaction {
+	return &CommonTransaction{
 		Type:      t.Type,
 		Version:   t.Version,
 		TimeStamp: t.TimeStamp,
@@ -306,27 +392,30 @@ func (t *MultisigTransaction) GetCommon() CommonTransaction {
 	}
 }
 
+func (t *MultisigTransaction) String() string {
+	return fmt.Sprintf(
+		`
+			"Common": %v,
+			"OtherTrans": %v,
+			"Signatures": %v
+		`,
+		t.CommonTransaction.String(),
+		t.OtherTrans,
+		t.Signatures,
+	)
+}
+
 func (t *MultisigTransaction) GetTx() Transaction {
 	tx := t.OtherTrans.(Transaction)
-	return Transaction{
-		TimeStamp: tx.TimeStamp,
-		Amount:    tx.Amount,
-		Fee:       tx.Fee,
-		Recipient: tx.Recipient,
-		Type:      tx.Type,
-		Deadline:  tx.Deadline,
-		Version:   tx.Version,
-		Signer:    tx.Signer,
-		Message:   tx.Message,
-	}
+	return tx
 }
 
 func (t *TransferTransaction) GetType() int {
 	return t.Type
 }
 
-func (t *TransferTransaction) GetCommon() CommonTransaction {
-	return CommonTransaction{
+func (t *TransferTransaction) GetCommon() *CommonTransaction {
+	return &CommonTransaction{
 		Type:      t.Type,
 		Version:   t.Version,
 		TimeStamp: t.TimeStamp,
@@ -334,45 +423,27 @@ func (t *TransferTransaction) GetCommon() CommonTransaction {
 		Signer:    t.Signer,
 		Fee:       t.Fee,
 	}
+}
+
+func (t *TransferTransaction) String() string {
+	return fmt.Sprintf(
+		`
+			"Common": %v,
+			"Amount": %v,
+			"Recipient": %v,
+			"Signature": %v,
+			"Message": %v
+			"Mosaics": %v
+		`,
+		t.CommonTransaction.String(),
+		t.Amount,
+		t.Recipient,
+		t.Signature,
+		t.Message,
+		t.Mosaics,
+	)
 }
 
 func (t *TransferTransaction) GetTx() Transaction {
-	return Transaction{
-		TimeStamp: t.TimeStamp,
-		Amount:    0,
-		Fee:       t.Fee,
-		Recipient: t.Recipient,
-		Type:      t.Type,
-		Deadline:  t.Deadline,
-		Version:   t.Version,
-		Signer:    t.Signer,
-	}
-}
-
-func (t *Transaction) GetType() int {
-	return t.Type
-}
-
-func (t *Transaction) GetCommon() CommonTransaction {
-	return CommonTransaction{
-		Type:      t.Type,
-		Version:   t.Version,
-		TimeStamp: t.TimeStamp,
-		Deadline:  t.Deadline,
-		Signer:    t.Signer,
-		Fee:       t.Fee,
-	}
-}
-
-func (t *Transaction) GetTx() Transaction {
-	return Transaction{
-		TimeStamp: t.TimeStamp,
-		Amount:    0,
-		Fee:       t.Fee,
-		Recipient: t.Recipient,
-		Type:      t.Type,
-		Deadline:  t.Deadline,
-		Version:   t.Version,
-		Signer:    t.Signer,
-	}
+	return t
 }

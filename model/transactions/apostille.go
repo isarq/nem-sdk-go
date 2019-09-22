@@ -23,8 +23,8 @@ type Apost struct {
 }
 
 type Apostilledata struct {
-	Data        DataAp      `json:"data"`
-	Transaction base.TxDict `json:"transaction"`
+	Data        DataAp           `json:"data"`
+	Transaction base.Transaction `json:"transaction"`
 }
 
 type DataAp struct {
@@ -155,6 +155,7 @@ func Create(common Common, fileName string, fileContent []byte, tags string, has
 	}
 }
 
+// TODO
 // Verify an apostille
 // param fileContent - The file content
 // param apostilleTransaction - The transaction object for the apostille
@@ -163,7 +164,7 @@ func VerifyApost(fileContent []byte, apostilleTransaction base.TransactionRespon
 	var apostilleHash string
 	if apostilleTransaction.Type == 4100 {
 		tx := apostilleTransaction.OtherTrans
-		apostilleHash = tx.Message.Payload
+		apostilleHash = tx.(*base.TransferTransaction).Message.Payload
 	} else {
 		apostilleHash = apostilleTransaction.Message.Payload
 	}

@@ -124,12 +124,17 @@ func constructMs(msc mosaicPrepare) *base.MosaicDefinitionCreationTransaction {
 		levyData.MosaicID = msc.levy.Mosaic
 		levyData.Fee = msc.levy.Fee
 	}
-	custom := base.MosaicDefinitionCreationTransaction{
-		TimeStamp:       data.TimeStamp,
-		Signer:          data.Signer,
-		Type:            data.Type,
-		Deadline:        data.Deadline,
-		Version:         data.Version,
+
+	return &base.MosaicDefinitionCreationTransaction{
+		CommonTransaction: base.CommonTransaction{
+			TimeStamp: data.TimeStamp,
+			Signer:    data.Signer,
+			Type:      data.Type,
+			Deadline:  data.Deadline,
+			Version:   data.Version,
+			Fee:       fee,
+		},
+
 		CreationFeeSink: msc.rentalFeeSink,
 		CreationFee:     msc.rentalFee,
 		MosaicDefinition: base.MosaicDefinition{
@@ -144,9 +149,7 @@ func constructMs(msc mosaicPrepare) *base.MosaicDefinitionCreationTransaction {
 			Properties:  msc.mosaicProperties,
 			Levy:        levyData,
 		},
-		Fee: fee,
 	}
-	return &custom
 }
 
 // The common part of transactions

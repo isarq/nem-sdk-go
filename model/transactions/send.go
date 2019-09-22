@@ -1,6 +1,7 @@
 package transactions
 
 import (
+	"fmt"
 	"github.com/isarq/nem-sdk-go/com/requests"
 	"github.com/isarq/nem-sdk-go/extras"
 	"github.com/isarq/nem-sdk-go/model"
@@ -39,5 +40,7 @@ func Send(common Common, entity interface{}, endpoint *requests.Client) (request
 		Signature: utils.Bt2Hex(signature),
 	}
 
+	fmt.Println(utils.Struc2Json(obj))
+	//return requests.NemAnnounceResult{}, nil
 	return endpoint.Announce(obj)
 }

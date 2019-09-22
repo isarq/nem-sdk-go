@@ -38,17 +38,13 @@ func (t *NamespaceProvision) GetType() int {
 	return 0
 }
 
-func (t *NamespaceProvision) GetTx() base.Transaction {
-	return base.Transaction{}
-}
-
 // Prepare a namespace provision transaction object
 // param common - A common struct
 // param r - An un-prepared namespaceProvisionTransaction method
 // param network - A network id
 // return - A [ProvisionNamespaceTransaction] struct
 // link {http://bob.nem.ninja/docs/#provisionNamespaceTransaction}
-func (r *NamespaceProvision) Prepare(common Common, network int) base.TxDict {
+func (r *NamespaceProvision) Prepare(common Common, network int) base.Transaction {
 	var msc nsPrepare
 	if extras.IsEmpty(common) || extras.IsEmpty(network) {
 		err := errors.New("missing parameter !")
@@ -107,16 +103,18 @@ func construct(msc nsPrepare) *base.ProvisionNamespaceTransaction {
 	fee := model.NamespaceAndMosaicCommon
 
 	custom := base.ProvisionNamespaceTransaction{
-		TimeStamp:     data.TimeStamp,
-		Signer:        data.Signer,
-		Type:          data.Type,
-		Deadline:      data.Deadline,
-		Version:       data.Version,
+		CommonTransaction: base.CommonTransaction{
+			TimeStamp: data.TimeStamp,
+			Signer:    data.Signer,
+			Type:      data.Type,
+			Deadline:  data.Deadline,
+			Version:   data.Version,
+			Fee:       fee,
+		},
 		RentalFeeSink: msc.rentalFeeSink,
 		RentalFee:     msc.rentalFee,
 		Parent:        msc.namespaceParent,
 		NewPart:       msc.namespaceName,
-		Fee:           fee,
 	}
 	return &custom
 }

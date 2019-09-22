@@ -19,12 +19,15 @@ func MultisigWrapper(senderPublicKey string, innerEntity base.Tx, due int64, net
 	data := CommonPart(model.MultisigTransaction, version, timeStamp, due, senderPublicKey)
 
 	custom := base.MultisigTransaction{
-		TimeStamp:  data.TimeStamp,
-		Version:    data.Version,
-		Signer:     data.Signer,
-		Type:       data.Type,
-		Deadline:   data.Deadline,
-		Fee:        model.Multisigtransaction,
+		CommonTransaction: base.CommonTransaction{
+			TimeStamp: data.TimeStamp,
+			Version:   data.Version,
+			Signer:    data.Signer,
+			Type:      data.Type,
+			Deadline:  data.Deadline,
+			Fee:       model.Multisigtransaction,
+		},
+
 		OtherTrans: innerEntity,
 	}
 	return &custom

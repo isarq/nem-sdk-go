@@ -13,7 +13,6 @@ func (c Client) buildReq(params map[string]string, body []byte, method string) (
 		}
 		c.URL.RawQuery = q.Encode()
 	}
-	//fmt.Println(c.URL.String())
 
 	req, err := http.NewRequest(method, c.URL.String(), bytes.NewBuffer(body))
 	if err != nil {

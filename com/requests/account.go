@@ -1,12 +1,15 @@
 package requests
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/isarq/nem-sdk-go/base"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -91,14 +94,22 @@ type TransactionMetaDataPair struct {
 
 // The unconfirmed transaction meta data contains the hash of the inner transaction in case the transaction
 // is a multisig transaction. This data is need to initiate a multisig signature transaction.
-type UnconfirmedTransactionMetaData struct {
+type MetaData struct {
 	Data string `json:"data"`
 }
 
 // Transactions meta data object contains additional information about the transaction.
 type UnconfirmedTransactionMetaDataPair struct {
-	Meta        UnconfirmedTransactionMetaData `json:"meta"`
-	Transaction base.Transaction               `json:"transaction"`
+	Transaction base.Transaction `json:"transaction"`
+}
+
+type unconfirmedMosaicTransactionMetaDataPair struct {
+	Meta        MetaData               `json:"meta"`
+	Transaction base.TransactionMosaic `json:"transaction"`
+}
+
+func (t *unconfirmedMosaicTransactionMetaDataPair) toStruct() (base.Transaction, error) {
+	return &t.Transaction, nil
 }
 
 // Each node can allow users to harvest with their delegated key on that node.
@@ -127,6 +138,81 @@ type HgAccountData struct {
 	StartHeight int    `json:"startHeight,omitempty"`
 	EndHeight   int    `json:"endHeight,omitempty"`
 	IncrementBy int    `json:"incrementBy,omitempty"`
+}
+
+func MapTransactions(b *bytes.Buffer) ([]base.Transaction, error) {
+	var wg sync.WaitGroup
+	var err error
+
+	var m []json.RawMessage
+
+	//fmt.Println(string((b.Bytes()[8:len(b.Bytes())-3])))
+	err = json.Unmarshal(b.Bytes()[8:len(b.Bytes())-3], &m)
+	if err != nil {
+		return nil, err
+	}
+
+	txs := make([]base.Transaction, len(m))
+	errs := make([]error, len(m))
+	for i, t := range m {
+		wg.Add(1)
+		go func(i int, t json.RawMessage) {
+			defer wg.Done()
+			txs[i], errs[i] = MapTransaction(bytes.NewBuffer(t))
+		}(i, t)
+	}
+	wg.Wait()
+
+	for _, err = range errs {
+		if err != nil {
+			return txs, err
+		}
+	}
+
+	return txs, nil
+}
+
+func MapTransaction(b *bytes.Buffer) (base.Transaction, error) {
+	rawT := struct {
+		Transaction struct {
+			Type uint16
+		}
+	}{}
+
+	err := json.Unmarshal(b.Bytes(), &rawT)
+	if err != nil {
+		return nil, err
+	}
+
+	var dto transactionDto = nil
+
+	switch rawT.Transaction.Type {
+	case 257:
+		dto = &unconfirmedMosaicTransactionMetaDataPair{}
+	}
+
+	return dtoToTransaction(b, dto)
+}
+
+type transactionDto interface {
+	toStruct() (base.Transaction, error)
+}
+
+func dtoToTransaction(b *bytes.Buffer, dto transactionDto) (base.Transaction, error) {
+	if dto == nil {
+		return nil, errors.New("dto can't be nil")
+	}
+
+	err := json.Unmarshal(b.Bytes(), dto)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := dto.toStruct()
+	if err != nil {
+		return nil, err
+	}
+	return tx, nil
 }
 
 // Gets the AccountMetaDataPair of an account.
@@ -329,7 +415,9 @@ func (c *Client) OutgoingTransactions(address, txHash, txId string) ([]Transacti
 // param address - An account address
 // return - An slice of [UnconfirmedTransactionMetaDataPair] struct
 // link http://bob.nem.ninja/docs/#unconfirmedTransactionMetaDataPair
-func (c *Client) UnconfirmedTransactions(address string) ([]UnconfirmedTransactionMetaDataPair, error) {
+func (c *Client) UnconfirmedTransactions(address string) ([]base.Transaction, error) {
+
+	b := new(bytes.Buffer)
 	params := map[string]string{"address": address}
 	timeout := time.Duration(10 * time.Second)
 	client := http.Client{
@@ -338,32 +426,23 @@ func (c *Client) UnconfirmedTransactions(address string) ([]UnconfirmedTransacti
 	c.URL.Path = "/account/unconfirmedTransactions"
 	req, err := c.buildReq(params, nil, http.MethodGet)
 	if err != nil {
-		return []UnconfirmedTransactionMetaDataPair{}, err
+		return nil, err
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return []UnconfirmedTransactionMetaDataPair{}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
-	byteArray, err := ioutil.ReadAll(resp.Body)
 
 	if resp.StatusCode != 200 {
-		err := errors.New(string(byteArray))
-		return []UnconfirmedTransactionMetaDataPair{}, err
+		b := &bytes.Buffer{}
+		_, _ = b.ReadFrom(resp.Body)
+		return nil, errors.New(b.String())
 	}
 
-	var data = struct {
-		Data []UnconfirmedTransactionMetaDataPair
-	}{}
-	if err := json.Unmarshal(byteArray, &data); err != nil {
-		fmt.Println(err)
-		return []UnconfirmedTransactionMetaDataPair{}, err
-	}
-	if data.Data == nil {
-		return []UnconfirmedTransactionMetaDataPair{}, err
-	}
+	_, _ = io.Copy(b, resp.Body)
 
-	return data.Data, nil
+	return MapTransactions(b)
 }
 
 // Gets information about the maximum number of allowed harvesters and
