@@ -80,7 +80,8 @@ func IsHexadecimal(str string) bool {
 // Create a time stamp for a NEM transaction
 // return The NEM transaction time stamp in milliseconds
 func CreateNEMTimeStamp() int64 {
-	return int64(math.Floor(float64(time.Now().Unix() - 1427587585)))
+	// 1427587585
+	return int64(math.Floor(float64(time.Now().Unix() - 1425168385)))
 }
 
 // Fix a private key
