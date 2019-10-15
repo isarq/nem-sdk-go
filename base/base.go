@@ -405,11 +405,6 @@ func (t *MultiSignTransaction) String() string {
 	)
 }
 
-func (t *MultiSignTransaction) GetTx() Transaction {
-	tx := t.OtherTrans.(Transaction)
-	return tx
-}
-
 func (t *TransferTransaction) GetType() int {
 	return t.Type
 }

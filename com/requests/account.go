@@ -99,11 +99,6 @@ type MetaData struct {
 	Data string `json:"data"`
 }
 
-// Transactions meta data object contains additional information about the transaction.
-type UnconfirmedTransactionMetaDataPair struct {
-	Transaction base.Transaction `json:"transaction"`
-}
-
 type unconfirmedMosaicTransactionMetaDataPair struct {
 	Meta        TransactionMetaData    `json:"meta"`
 	Transaction base.TransactionMosaic `json:"transaction"`
@@ -120,7 +115,54 @@ type multiSignTransactionMetaDataPair struct {
 
 func (t *multiSignTransactionMetaDataPair) toStruct() (*TransactionMetaData, base.Transaction, error) {
 
+	p := t.Transaction.OtherTrans
+	d, err := json.Marshal(p)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var m json.RawMessage
+
+	err = json.Unmarshal(d, &m)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	other, err := mapOtherTransaction(bytes.NewBuffer(m))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	t.Transaction.OtherTrans = other
+
 	return &t.Meta, &t.Transaction, nil
+}
+
+type transferTransaction struct {
+	base.CommonTransaction
+	Amount    float64       `json:"amount,omitempty"`
+	Recipient string        `json:"recipient,omitempty"`
+	Message   base.Message  `json:"message,omitempty"`
+	Signature string        `json:"signature,omitempty"`
+	Mosaics   []base.Mosaic `json:"mosaics,omitempty"`
+}
+
+func (t *transferTransaction) toStruct() (base.Transaction, error) {
+	return &base.TransferTransaction{
+		CommonTransaction: base.CommonTransaction{
+			Type:      t.Type,
+			Version:   t.Version,
+			Signer:    t.Signer,
+			TimeStamp: t.TimeStamp,
+			Fee:       t.Fee,
+			Deadline:  t.Deadline,
+		},
+		Amount:    t.Amount,
+		Recipient: t.Recipient,
+		Message:   t.Message,
+		Signature: t.Signature,
+		Mosaics:   t.Mosaics,
+	}, nil
 }
 
 // Each node can allow users to harvest with their delegated key on that node.
@@ -184,6 +226,7 @@ func MapTransactions(b *bytes.Buffer) ([]base.Transaction, error) {
 }
 
 func MapTransaction(b *bytes.Buffer) (*TransactionMetaData, base.Transaction, error) {
+	var t uint16
 	rawT := struct {
 		Transaction struct {
 			Type uint16
@@ -194,10 +237,23 @@ func MapTransaction(b *bytes.Buffer) (*TransactionMetaData, base.Transaction, er
 	if err != nil {
 		return nil, nil, err
 	}
+	t = rawT.Transaction.Type
+
+	if t == 0 {
+		rawT := struct {
+			Type uint16 `json:"type"`
+		}{}
+
+		err := json.Unmarshal(b.Bytes(), &rawT)
+		if err != nil {
+			return nil, nil, err
+		}
+		t = rawT.Type
+	}
 
 	var dto transactionDto = nil
 
-	switch rawT.Transaction.Type {
+	switch t {
 	case model.Transfer:
 		dto = &unconfirmedMosaicTransactionMetaDataPair{}
 	case model.MultiSignTransaction:
@@ -207,6 +263,29 @@ func MapTransaction(b *bytes.Buffer) (*TransactionMetaData, base.Transaction, er
 	}
 
 	return dtoToTransaction(b, dto)
+}
+
+func mapOtherTransaction(b *bytes.Buffer) (base.Transaction, error) {
+
+	rawT := struct {
+		Type uint16 `json:"type"`
+	}{}
+
+	err := json.Unmarshal(b.Bytes(), &rawT)
+	if err != nil {
+		return nil, err
+	}
+
+	var dto otherTransactionDto
+
+	switch rawT.Type {
+	case model.Transfer:
+		dto = &transferTransaction{}
+	default:
+		fmt.Println(rawT.Type)
+	}
+
+	return dtoToOtherTransaction(b, dto)
 }
 
 type transactionDto interface {
@@ -228,6 +307,27 @@ func dtoToTransaction(b *bytes.Buffer, dto transactionDto) (*TransactionMetaData
 		return nil, nil, err
 	}
 	return meta, tx, nil
+}
+
+type otherTransactionDto interface {
+	toStruct() (base.Transaction, error)
+}
+
+func dtoToOtherTransaction(b *bytes.Buffer, dto otherTransactionDto) (base.Transaction, error) {
+	if dto == nil {
+		return nil, errors.New("dto can't be nil")
+	}
+
+	err := json.Unmarshal(b.Bytes(), dto)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := dto.toStruct()
+	if err != nil {
+		return nil, err
+	}
+	return tx, nil
 }
 
 // Gets the AccountMetaDataPair of an account.
@@ -434,7 +534,7 @@ func (c *Client) UnconfirmedTransactions(address string) ([]base.Transaction, er
 
 	b := new(bytes.Buffer)
 	params := map[string]string{"address": address}
-	timeout := time.Duration(10 * time.Second)
+	timeout := 10 * time.Second
 	client := http.Client{
 		Timeout: timeout,
 	}
