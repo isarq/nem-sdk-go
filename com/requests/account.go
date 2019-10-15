@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/isarq/nem-sdk-go/base"
+	"github.com/isarq/nem-sdk-go/model"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -89,7 +90,7 @@ type TransactionMetaData struct {
 // Transactions meta data object contains additional information about the transaction.
 type TransactionMetaDataPair struct {
 	Meta        TransactionMetaData      `json:"meta"`
-	Transaction base.TransactionResponce `json:"transaction"`
+	Transaction base.TransactionResponse `json:"transaction"`
 }
 
 // The unconfirmed transaction meta data contains the hash of the inner transaction in case the transaction
@@ -109,6 +110,15 @@ type unconfirmedMosaicTransactionMetaDataPair struct {
 }
 
 func (t *unconfirmedMosaicTransactionMetaDataPair) toStruct() (base.Transaction, error) {
+	return &t.Transaction, nil
+}
+
+type multiSignTransactionMetaDataPair struct {
+	Meta        MetaData                  `json:"meta"`
+	Transaction base.MultiSignTransaction `json:"transaction"`
+}
+
+func (t *multiSignTransactionMetaDataPair) toStruct() (base.Transaction, error) {
 	return &t.Transaction, nil
 }
 
@@ -187,8 +197,12 @@ func MapTransaction(b *bytes.Buffer) (base.Transaction, error) {
 	var dto transactionDto = nil
 
 	switch rawT.Transaction.Type {
-	case 257:
+	case model.Transfer:
 		dto = &unconfirmedMosaicTransactionMetaDataPair{}
+	case model.MultiSignTransaction:
+		dto = &multiSignTransactionMetaDataPair{}
+	default:
+		fmt.Println(rawT.Transaction.Type)
 	}
 
 	return dtoToTransaction(b, dto)

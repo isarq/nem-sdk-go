@@ -10,16 +10,16 @@ const ImportanceTransfer = 0x801 // 2049
 const MultisigModification = 0x1001 // 4097
 
 // The multisignature signature transaction type
-const MultisigSignature = 0x1002 // 4098
+const MultiSignSignature = 0x1002 // 4098
 
 // The multisignature transaction type
-const MultisigTransaction = 0x1004 // 4100
+const MultiSignTransaction = 0x1004 // 4100
 
 // The provision namespace transaction type
 const ProvisionNamespace = 0x2001 // 8193
 
 // The mosaic definition transaction type
-const Mosaicdefinition = 0x4001 // 16385
+const MosaicDefinition = 0x4001 // 16385
 
 // The mosaic supply change transaction type
 

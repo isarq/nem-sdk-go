@@ -201,7 +201,7 @@ type ProvisionNamespaceTransaction struct {
 	Parent        string  `json:"parent"`
 }
 
-type MultisigSignatureTransaction struct {
+type MultiSignSignatureTransaction struct {
 	TimeStamp int64  `json:"timeStamp"`
 	Fee       int    `json:"fee"`
 	Type      int    `json:"type"`
@@ -214,24 +214,24 @@ type MultisigSignatureTransaction struct {
 	OtherAccount string `json:"otherAccount"`
 }
 
-type TransactionResponce struct {
-	TimeStamp  int64                          `json:"timeStamp"`
-	Amount     float64                        `json:"amount"`
-	Fee        float64                        `json:"fee"`
-	Recipient  string                         `json:"recipient,omitempty"`
-	Type       int                            `json:"type,omitempty"`
-	Deadline   int64                          `json:"deadline"`
-	Message    *Message                       `json:"message,omitempty"`
-	Version    int                            `json:"version,omitempty"`
-	Signer     string                         `json:"signer,omitempty"`
-	OtherTrans Transaction                    `json:"otherTrans,omitempty"`
-	Signatures []MultisigSignatureTransaction `json:"signatures,omitempty"`
+type TransactionResponse struct {
+	TimeStamp  int64                           `json:"timeStamp"`
+	Amount     float64                         `json:"amount"`
+	Fee        float64                         `json:"fee"`
+	Recipient  string                          `json:"recipient,omitempty"`
+	Type       int                             `json:"type,omitempty"`
+	Deadline   int64                           `json:"deadline"`
+	Message    *Message                        `json:"message,omitempty"`
+	Version    int                             `json:"version,omitempty"`
+	Signer     string                          `json:"signer,omitempty"`
+	OtherTrans Transaction                     `json:"otherTrans,omitempty"`
+	Signatures []MultiSignSignatureTransaction `json:"signatures,omitempty"`
 }
 
-type MultisigTransaction struct {
+type MultiSignTransaction struct {
 	CommonTransaction
-	OtherTrans interface{}                    `json:"otherTrans"`
-	Signatures []MultisigSignatureTransaction `json:"signatures,omitempty"`
+	OtherTrans interface{}                     `json:"otherTrans"`
+	Signatures []MultiSignSignatureTransaction `json:"signatures,omitempty"`
 }
 
 type AbstractTransaction struct {
@@ -377,11 +377,11 @@ func (t *ProvisionNamespaceTransaction) GetTx() Transaction {
 	return t
 }
 
-func (t *MultisigTransaction) GetType() int {
+func (t *MultiSignTransaction) GetType() int {
 	return t.Type
 }
 
-func (t *MultisigTransaction) GetCommon() *CommonTransaction {
+func (t *MultiSignTransaction) GetCommon() *CommonTransaction {
 	return &CommonTransaction{
 		Type:      t.Type,
 		Version:   t.Version,
@@ -392,7 +392,7 @@ func (t *MultisigTransaction) GetCommon() *CommonTransaction {
 	}
 }
 
-func (t *MultisigTransaction) String() string {
+func (t *MultiSignTransaction) String() string {
 	return fmt.Sprintf(
 		`
 			"Common": %v,
@@ -405,7 +405,7 @@ func (t *MultisigTransaction) String() string {
 	)
 }
 
-func (t *MultisigTransaction) GetTx() Transaction {
+func (t *MultiSignTransaction) GetTx() Transaction {
 	tx := t.OtherTrans.(Transaction)
 	return tx
 }

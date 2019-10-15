@@ -160,7 +160,7 @@ func Create(common Common, fileName string, fileContent []byte, tags string, has
 // param fileContent - The file content
 // param apostilleTransaction - The transaction object for the apostille
 // return - True if valid, false otherwise
-func VerifyApost(fileContent []byte, apostilleTransaction base.TransactionResponce) bool {
+func VerifyApost(fileContent []byte, apostilleTransaction base.TransactionResponse) bool {
 	var apostilleHash string
 	if apostilleTransaction.Type == 4100 {
 		tx := apostilleTransaction.OtherTrans

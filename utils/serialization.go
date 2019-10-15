@@ -227,7 +227,6 @@ func SerializeTransaction(entity interface{}) []byte {
 
 	switch entity.(type) {
 	case *base.TransferTransaction:
-		//fmt.Println("TransferTransaction")
 		tx, _ := entity.(*base.TransferTransaction)
 		common, _ := commonHeader(tx)
 		data = common
@@ -303,10 +302,10 @@ func SerializeTransaction(entity interface{}) []byte {
 		temp = serializeSafeString(tx.Parent)
 		data = append(data, temp...)
 
-		// Multisig wrapped transaction
-	case *base.MultisigTransaction:
-		//fmt.Println("MultisigSignature")
-		tx, _ := entity.(*base.MultisigTransaction)
+		// MultiSign wrapped transaction
+	case *base.MultiSignTransaction:
+		//fmt.Println("MultiSignSignature")
+		tx, _ := entity.(*base.MultiSignTransaction)
 		common, _ := commonHeader(tx)
 		data = common
 		temp := SerializeTransaction(tx.OtherTrans)

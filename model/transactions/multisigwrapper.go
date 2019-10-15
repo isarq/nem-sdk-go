@@ -13,12 +13,12 @@ import (
 // param network - A network id
 // return - A [MultisigTransaction] struct
 // link http://bob.nem.ninja/docs/#multisigTransaction
-func MultisigWrapper(senderPublicKey string, innerEntity base.Tx, due int64, network int) *base.MultisigTransaction {
+func MultisigWrapper(senderPublicKey string, innerEntity base.Tx, due int64, network int) *base.MultiSignTransaction {
 	timeStamp := utils.CreateNEMTimeStamp()
 	version := model.GetVersion(1, network)
-	data := CommonPart(model.MultisigTransaction, version, timeStamp, due, senderPublicKey)
+	data := CommonPart(model.MultiSignTransaction, version, timeStamp, due, senderPublicKey)
 
-	custom := base.MultisigTransaction{
+	custom := base.MultiSignTransaction{
 		CommonTransaction: base.CommonTransaction{
 			TimeStamp: data.TimeStamp,
 			Version:   data.Version,

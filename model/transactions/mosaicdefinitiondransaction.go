@@ -115,7 +115,7 @@ func (r MosaicDefinition) Prepare(common Common, network int) *base.MosaicDefini
 func constructMs(msc mosaicPrepare) *base.MosaicDefinitionCreationTransaction {
 	timeStamp := utils.CreateNEMTimeStamp()
 	version := model.GetVersion(1, msc.network)
-	data := CommonPart(model.Mosaicdefinition, version, timeStamp, msc.due, msc.senderPublicKey)
+	data := CommonPart(model.MosaicDefinition, version, timeStamp, msc.due, msc.senderPublicKey)
 	fee := model.NamespaceAndMosaicCommon
 	levyData := base.Levy{}
 	if !extras.IsEmpty(msc.levy) {

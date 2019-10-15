@@ -52,7 +52,7 @@ type ExplorerBlockViewModel struct {
 }
 
 type ExplorerTransferViewModel struct {
-	Tx        TransactionResponce `json:"tx"`
+	Tx        TransactionResponse `json:"tx"`
 	Hash      string              `json:"hash"`
 	InnerHash string              `json:"innerHash"`
 }

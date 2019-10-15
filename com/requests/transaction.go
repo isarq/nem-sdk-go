@@ -1,9 +1,12 @@
 package requests
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/isarq/nem-sdk-go/base"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -84,32 +87,30 @@ func (c Client) Announce(serialize RequestAnnounce) (NemAnnounceResult, error) {
 // param txHash - A transaction hash
 // return A [TransactionMetaDataPair] struct
 // link http://bob.nem.ninja/docs/#transactionMetaDataPair
-func (c *Client) ByHash(txHash string) (TransactionMetaDataPair, error) {
-	timeout := time.Duration(10 * time.Second)
+func (c *Client) ByHash(txHash string) (base.Transaction, error) {
+	b := new(bytes.Buffer)
+	timeout := 10 * time.Second
 	client := http.Client{
 		Timeout: timeout,
 	}
 	c.URL.Path = "/transaction/get"
 	req, err := c.buildReq(map[string]string{"hash": txHash}, nil, http.MethodGet)
 	if err != nil {
-		return TransactionMetaDataPair{}, err
+		return nil, err
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return TransactionMetaDataPair{}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
-	byteArray, err := ioutil.ReadAll(resp.Body)
 
 	if resp.StatusCode != 200 {
-		err := errors.New(string(byteArray))
-		return TransactionMetaDataPair{}, err
+		b := &bytes.Buffer{}
+		_, _ = b.ReadFrom(resp.Body)
+		return nil, errors.New(b.String())
 	}
 
-	var data TransactionMetaDataPair
-	if err := json.Unmarshal(byteArray, &data); err != nil {
-		fmt.Println(err)
-		return TransactionMetaDataPair{}, err
-	}
-	return data, nil
+	_, _ = io.Copy(b, resp.Body)
+
+	return MapTransaction(b)
 }
