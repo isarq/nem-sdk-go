@@ -322,14 +322,14 @@ func commonHeader(txstruct base.Transaction) (ch []byte, err error) {
 	Signer, _ := hex.DecodeString(tx.Signer)
 	data = encodeByte4(tx.Type) //tx type 0x0101
 
-	data = append(data, encodeByte4(tx.Version)...)   //version 0x01000098
-	data = append(data, encodeByte4(tx.TimeStamp)...) //timestamp 0xccaa7704
+	data = append(data, encodeByte4(tx.Version)...)    //version 0x01000098
+	data = append(data, encodeByte4(*tx.TimeStamp)...) //timestamp 0xccaa7704
 
 	data = append(data, encodeByte4(Const4bytessigner)...) //const 0x20000000
 
-	data = append(data, Signer...)                   //signer 32 bytes
-	data = append(data, encodeByte8(tx.Fee)...)      //fee 0xa086010000000000
-	data = append(data, encodeByte4(tx.Deadline)...) //deadline 0xdcb87704
+	data = append(data, Signer...)                    //signer 32 bytes
+	data = append(data, encodeByte8(tx.Fee)...)       //fee 0xa086010000000000
+	data = append(data, encodeByte4(*tx.Deadline)...) //deadline 0xdcb87704
 	return data, nil
 }
 

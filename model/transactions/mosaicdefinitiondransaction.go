@@ -161,11 +161,12 @@ func constructMs(msc mosaicPrepare) *base.MosaicDefinitionCreationTransaction {
 // param network - A network id
 // return - A common transaction struct
 func CommonPart(txtype, version int, timeStamp, due int64, senderPublicKey string) base.CommonTransaction {
+	deadline := timeStamp + due*60
 	return base.CommonTransaction{
 		Type:      txtype,
 		Version:   version,
 		Signer:    senderPublicKey,
-		TimeStamp: timeStamp,
-		Deadline:  timeStamp + due*60,
+		TimeStamp: &timeStamp,
+		Deadline:  &deadline,
 	}
 }

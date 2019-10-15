@@ -170,9 +170,9 @@ type CommonTransaction struct {
 	Type      int
 	Version   int
 	Signer    string
-	TimeStamp int64
+	TimeStamp *int64
 	Fee       float64
-	Deadline  int64
+	Deadline  *int64
 }
 
 func (c *CommonTransaction) String() string {
@@ -261,9 +261,9 @@ func (t *TransactionMosaic) GetCommon() *CommonTransaction {
 		Type:      t.Type,
 		Version:   t.Version,
 		Signer:    t.Signer,
-		TimeStamp: t.TimeStamp,
+		TimeStamp: &t.TimeStamp,
 		Fee:       t.Fee,
-		Deadline:  t.Deadline,
+		Deadline:  &t.Deadline,
 	}
 }
 

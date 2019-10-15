@@ -42,20 +42,20 @@ type RequestAnnounce struct {
 // param serialize - A RequestAnnounce struct
 // return - A [NemAnnounceResult] struct
 // link http://bob.nem.ninja/docs/#nemAnnounceResult
-func (c Client) Announce(serialize RequestAnnounce) (NemAnnounceResult, error) {
-	timeout := time.Duration(10 * time.Second)
+func (c *Client) Announce(serialize RequestAnnounce) (*NemAnnounceResult, error) {
+	timeout := 10 * time.Second
 	client := http.Client{
 		Timeout: timeout,
 	}
 
 	payload, err := json.Marshal(serialize)
 	if err != nil {
-		return NemAnnounceResult{}, err
+		return nil, err
 	}
 	c.URL.Path = "/transaction/announce"
 	req, err := c.buildReq(nil, payload, http.MethodPost)
 	if err != nil {
-		return NemAnnounceResult{}, err
+		return nil, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -63,23 +63,22 @@ func (c Client) Announce(serialize RequestAnnounce) (NemAnnounceResult, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return NemAnnounceResult{}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	byteArray, err := ioutil.ReadAll(resp.Body)
 
 	if resp.StatusCode != 200 {
-		err := errors.New(string(byteArray))
-		return NemAnnounceResult{}, err
+		return nil, errors.New(string(byteArray))
 	}
 	// The data is returned as a nested json array
 	// This enables us to not return the array nested
 	// as a value under a "data" key
 	data := NemAnnounceResult{}
 	if err = json.Unmarshal(byteArray, &data); err != nil {
-		return NemAnnounceResult{}, err
+		return nil, err
 	}
-	return data, nil
+	return &data, nil
 }
 
 // Gets a TransactionMetaDataPair object from the chain using it's hash
