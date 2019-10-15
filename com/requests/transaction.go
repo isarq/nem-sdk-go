@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/isarq/nem-sdk-go/base"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -86,7 +85,7 @@ func (c *Client) Announce(serialize RequestAnnounce) (*NemAnnounceResult, error)
 // param txHash - A transaction hash
 // return A [TransactionMetaDataPair] struct
 // link http://bob.nem.ninja/docs/#transactionMetaDataPair
-func (c *Client) ByHash(txHash string) (base.Transaction, error) {
+func (c *Client) ByHash(txHash string) (*TransactionMetaDataPair, error) {
 	b := new(bytes.Buffer)
 	timeout := 10 * time.Second
 	client := http.Client{
@@ -111,5 +110,12 @@ func (c *Client) ByHash(txHash string) (base.Transaction, error) {
 
 	_, _ = io.Copy(b, resp.Body)
 
-	return MapTransaction(b)
+	meta, tx, err := MapTransaction(b)
+	if err != nil {
+		return nil, err
+	}
+	return &TransactionMetaDataPair{
+		Meta:        *meta,
+		Transaction: tx,
+	}, nil
 }

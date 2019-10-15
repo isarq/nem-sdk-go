@@ -89,8 +89,8 @@ type TransactionMetaData struct {
 
 // Transactions meta data object contains additional information about the transaction.
 type TransactionMetaDataPair struct {
-	Meta        TransactionMetaData      `json:"meta"`
-	Transaction base.TransactionResponse `json:"transaction"`
+	Meta        TransactionMetaData `json:"meta"`
+	Transaction base.Transaction    `json:"transaction"`
 }
 
 // The unconfirmed transaction meta data contains the hash of the inner transaction in case the transaction
@@ -105,21 +105,22 @@ type UnconfirmedTransactionMetaDataPair struct {
 }
 
 type unconfirmedMosaicTransactionMetaDataPair struct {
-	Meta        MetaData               `json:"meta"`
+	Meta        TransactionMetaData    `json:"meta"`
 	Transaction base.TransactionMosaic `json:"transaction"`
 }
 
-func (t *unconfirmedMosaicTransactionMetaDataPair) toStruct() (base.Transaction, error) {
-	return &t.Transaction, nil
+func (t *unconfirmedMosaicTransactionMetaDataPair) toStruct() (*TransactionMetaData, base.Transaction, error) {
+	return &t.Meta, &t.Transaction, nil
 }
 
 type multiSignTransactionMetaDataPair struct {
-	Meta        MetaData                  `json:"meta"`
+	Meta        TransactionMetaData       `json:"meta"`
 	Transaction base.MultiSignTransaction `json:"transaction"`
 }
 
-func (t *multiSignTransactionMetaDataPair) toStruct() (base.Transaction, error) {
-	return &t.Transaction, nil
+func (t *multiSignTransactionMetaDataPair) toStruct() (*TransactionMetaData, base.Transaction, error) {
+
+	return &t.Meta, &t.Transaction, nil
 }
 
 // Each node can allow users to harvest with their delegated key on that node.
@@ -156,19 +157,19 @@ func MapTransactions(b *bytes.Buffer) ([]base.Transaction, error) {
 
 	var m []json.RawMessage
 
-	//fmt.Println(string((b.Bytes()[8:len(b.Bytes())-3])))
 	err = json.Unmarshal(b.Bytes()[8:len(b.Bytes())-3], &m)
 	if err != nil {
 		return nil, err
 	}
 
 	txs := make([]base.Transaction, len(m))
+	meta := make([]*TransactionMetaData, len(m))
 	errs := make([]error, len(m))
 	for i, t := range m {
 		wg.Add(1)
 		go func(i int, t json.RawMessage) {
 			defer wg.Done()
-			txs[i], errs[i] = MapTransaction(bytes.NewBuffer(t))
+			meta[i], txs[i], errs[i] = MapTransaction(bytes.NewBuffer(t))
 		}(i, t)
 	}
 	wg.Wait()
@@ -182,7 +183,7 @@ func MapTransactions(b *bytes.Buffer) ([]base.Transaction, error) {
 	return txs, nil
 }
 
-func MapTransaction(b *bytes.Buffer) (base.Transaction, error) {
+func MapTransaction(b *bytes.Buffer) (*TransactionMetaData, base.Transaction, error) {
 	rawT := struct {
 		Transaction struct {
 			Type uint16
@@ -191,7 +192,7 @@ func MapTransaction(b *bytes.Buffer) (base.Transaction, error) {
 
 	err := json.Unmarshal(b.Bytes(), &rawT)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var dto transactionDto = nil
@@ -209,24 +210,24 @@ func MapTransaction(b *bytes.Buffer) (base.Transaction, error) {
 }
 
 type transactionDto interface {
-	toStruct() (base.Transaction, error)
+	toStruct() (*TransactionMetaData, base.Transaction, error)
 }
 
-func dtoToTransaction(b *bytes.Buffer, dto transactionDto) (base.Transaction, error) {
+func dtoToTransaction(b *bytes.Buffer, dto transactionDto) (*TransactionMetaData, base.Transaction, error) {
 	if dto == nil {
-		return nil, errors.New("dto can't be nil")
+		return nil, nil, errors.New("dto can't be nil")
 	}
 
 	err := json.Unmarshal(b.Bytes(), dto)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	tx, err := dto.toStruct()
+	meta, tx, err := dto.toStruct()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return tx, nil
+	return meta, tx, nil
 }
 
 // Gets the AccountMetaDataPair of an account.
@@ -794,11 +795,11 @@ func (c *Client) AllTransactions(address, txHash, txId string) ([]TransactionMet
 	c.URL.Path = "/account/transfers/all"
 	req, err := c.buildReq(params, nil, http.MethodGet)
 	if err != nil {
-		return []TransactionMetaDataPair{}, err
+		return nil, err
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return []TransactionMetaDataPair{}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	byteArray, err := ioutil.ReadAll(resp.Body)
@@ -811,7 +812,7 @@ func (c *Client) AllTransactions(address, txHash, txId string) ([]TransactionMet
 	var data = struct{ Data []TransactionMetaDataPair }{}
 	if err := json.Unmarshal(byteArray, &data); err != nil {
 		fmt.Println(err)
-		return []TransactionMetaDataPair{}, err
+		return nil, err
 	}
 	return data.Data, nil
 }
