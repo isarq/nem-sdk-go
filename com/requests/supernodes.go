@@ -3,7 +3,6 @@ package requests
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/isarq/nem-sdk-go/model"
 	"io/ioutil"
 	"net/http"
@@ -168,7 +167,6 @@ func GetSuperNodeStatus(status int) ([]SuperNode, error) {
 	defer resp.Body.Close()
 	byteArray, err := ioutil.ReadAll(resp.Body)
 
-	fmt.Println("NODOS: ", string(byteArray))
 	if resp.StatusCode != 200 {
 		err := errors.New(string(byteArray))
 		return []SuperNode{}, err
@@ -180,7 +178,6 @@ func GetSuperNodeStatus(status int) ([]SuperNode, error) {
 		Data []SuperNode
 	}{}
 	if err = json.Unmarshal(byteArray, &data); err != nil {
-		fmt.Println("ERRRR", err)
 		return []SuperNode{}, err
 	}
 	return data.Data, nil
