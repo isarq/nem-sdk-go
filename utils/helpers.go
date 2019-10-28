@@ -33,7 +33,9 @@ func CleanTextAmount(n string) float64 {
 // return An endpoint url
 func FormatEndpoint(endpoint base.Node) string {
 	port := strconv.Itoa(endpoint.Port)
-	return endpoint.Host + ":" + port
+	host := strings.Split(endpoint.Host, "://")[1]
+
+	return host + ":" + port
 }
 
 // Check if a private key is valid

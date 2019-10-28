@@ -66,6 +66,9 @@ func (c *Client) Announce(serialize RequestAnnounce) (*NemAnnounceResult, error)
 	}
 	defer resp.Body.Close()
 	byteArray, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 
 	if resp.StatusCode != 200 {
 		return nil, errors.New(string(byteArray))

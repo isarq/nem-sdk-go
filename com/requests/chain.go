@@ -3,6 +3,7 @@ package requests
 import (
 	"encoding/json"
 	"errors"
+	"github.com/isarq/nem-sdk-go/utils"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	. "github.com/isarq/nem-sdk-go/base"
-	"github.com/isarq/nem-sdk-go/utils"
 )
 
 // BlockHeight contains a chain height
@@ -58,9 +58,10 @@ type ExplorerTransferViewModel struct {
 }
 
 func NewClient(node Node) *Client {
+	protocol := strings.Split(node.Host, "://")
 	host := utils.FormatEndpoint(node)
-	host = strings.Replace(host, "http://", "", -1)
-	return &Client{Node: node, URL: url.URL{Scheme: "http", Host: host}}
+
+	return &Client{Node: node, URL: url.URL{Scheme: protocol[0], Host: host}}
 }
 
 // Gets the current height of the block chain.
