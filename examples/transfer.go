@@ -7,6 +7,7 @@ import (
 	"github.com/isarq/nem-sdk-go/utils"
 
 	"fmt"
+
 	"github.com/isarq/nem-sdk-go/model/transactions"
 )
 
@@ -30,7 +31,7 @@ func main() {
 	// Prepare the transfer transaction
 	transactionEntity, _ := tx.Prepare(common, model.Data.Testnet.ID)
 
-	res, err := transactions.Send(common, transactionEntity, *client)
+	res, err := transactions.Send(common, transactionEntity, client)
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return
