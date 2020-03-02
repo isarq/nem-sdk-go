@@ -73,7 +73,7 @@ func (r MosaicDefinition) Prepare(common Common, network int) *base.MosaicDefini
 	if !utils.IsPrivateKeyValid(common.PrivateKey) {
 		panic(nil)
 	}
-	kp := model.KeyPairCreate(common.PrivateKey)
+	kp, _ := model.KeyPairCreate(common.PrivateKey)
 	if r.IsMultisig {
 		if r.MultisigAccount != "" {
 			if !utils.IsPublicKeyValid(r.MultisigAccount) {

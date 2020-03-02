@@ -3,13 +3,14 @@ package transactions
 import (
 	"errors"
 	"fmt"
+	"math"
+	"strings"
+
 	"github.com/isarq/nem-sdk-go/base"
 	"github.com/isarq/nem-sdk-go/com/requests"
 	"github.com/isarq/nem-sdk-go/extras"
 	"github.com/isarq/nem-sdk-go/model"
 	"github.com/isarq/nem-sdk-go/utils"
-	"math"
-	"strings"
 )
 
 type txPrepare struct {
@@ -50,22 +51,23 @@ func (t *Transfer) GetType() int {
 // param network - A network id
 // return - A [TransferTransaction] struct
 // link http://bob.nem.ninja/docs/#transferTransaction
-func (r *Transfer) Prepare(common Common, network int) base.Transaction {
+func (r *Transfer) Prepare(common Common, network int) (base.Transaction, error) {
 	var msc txPrepare
 	if extras.IsEmpty(common) || extras.IsEmpty(network) {
-		err := errors.New("missing parameter !")
-		panic(err)
+		return nil, errors.New("missing parameter !")
 	}
-	kp := model.KeyPairCreate(common.PrivateKey)
+	kp, err := model.KeyPairCreate(common.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
 	if r.IsMultisig {
 		if r.MultisigAccount != "" {
 			if !utils.IsPublicKeyValid(r.MultisigAccount) {
-				panic(nil)
+				return nil, errors.New("Invalid public key!")
 			}
 			msc.senderPublicKey = r.MultisigAccount
 		} else {
-			err := errors.New("must place a publickey of the multifirm account")
-			panic(err)
+			return nil, errors.New("must place a publickey of the multifirm account")
 		}
 	} else {
 		msc.senderPublicKey = kp.PublicString()
@@ -88,9 +90,9 @@ func (r *Transfer) Prepare(common Common, network int) base.Transaction {
 
 	rt := constructtx(msc)
 	if r.IsMultisig && r.MultisigAccount != "" {
-		return MultisigWrapper(kp.PublicString(), rt, msc.due, network)
+		return MultisigWrapper(kp.PublicString(), rt, msc.due, network), nil
 	}
-	return rt
+	return rt, nil
 }
 
 // Prepare a mosaic transfer transaction struct
@@ -108,7 +110,7 @@ func (r *Transfer) PrepareMosaic(common Common, mosaicDefinitionMetaDataPair map
 		err := errors.New("missing parameter !")
 		panic(err)
 	}
-	kp := model.KeyPairCreate(common.PrivateKey)
+	kp, _ := model.KeyPairCreate(common.PrivateKey)
 	if r.IsMultisig {
 		if r.MultisigAccount != "" {
 			if !utils.IsPublicKeyValid(r.MultisigAccount) {

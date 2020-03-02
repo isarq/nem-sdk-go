@@ -7,6 +7,7 @@ import (
 	"github.com/isarq/nem-sdk-go/utils"
 
 	"fmt"
+
 	"github.com/isarq/nem-sdk-go/model/transactions"
 )
 
@@ -28,9 +29,9 @@ func main() {
 	//tx.MultisigAccount = "31efa466d2c0aee147397ec3bbe16354fd6fc10eb6710014c8d9a8924ad9b152"
 
 	// Prepare the transfer transaction
-	transactionEntity := tx.Prepare(common, model.Data.Testnet.ID)
+	transactionEntity, _ := tx.Prepare(common, model.Data.Testnet.ID)
 
-	res, err := transactions.Send(common, transactionEntity, *client)
+	res, err := transactions.Send(common, transactionEntity, client)
 	if err != nil {
 		fmt.Println(utils.Struc2Json(err))
 		return

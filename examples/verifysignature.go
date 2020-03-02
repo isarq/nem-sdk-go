@@ -9,13 +9,13 @@ import (
 
 func main() {
 	// Create keypair
-	kp := model.KeyPairCreate("")
+	kp, _ := model.KeyPairCreate("")
 
 	// Data to sign
 	data := "NEM is awesome !"
 
 	// Sign data
-	sig := kp.Sign(data)
+	sig, _ := kp.Sign([]byte(data))
 
 	// Review
 	fmt.Println("Public key: ", kp.PublicString())

@@ -37,9 +37,12 @@ func (k *KeyPair) PrivateString() string {
 
 // Sign signs the message with privateKey and returns a signature. It will
 // panic if len(privateKey) is not PrivateKeySize.
-func (k *KeyPair) Sign(msg string) []byte {
-	_, pr, _ := ed25519.GenerateKey(bytes.NewReader(k.Private))
-	return ed25519.Sign(pr, []byte(msg))
+func (k *KeyPair) Sign(msg []byte) ([]byte, error) {
+	_, pr, err := ed25519.GenerateKey(bytes.NewReader(k.Private))
+	if err != nil {
+		return nil, err
+	}
+	return ed25519.Sign(pr, msg), nil
 }
 
 // Verify reports whether sig is a valid signature of message by publicKey. It
@@ -55,10 +58,10 @@ func Verify(publicKey, message, sig []byte) bool {
 // param publicKey - A public key
 // param networkId - A network id
 // return - The NEM address
-func ToAddress(publicKey string, networkId int) string {
+func ToAddress(publicKey string, networkId int) (string, error) {
 	pk, err := hex.DecodeString(strings.TrimSpace(publicKey)) //Python
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	h := sha3.SumKeccak256(pk)
@@ -73,39 +76,39 @@ func ToAddress(publicKey string, networkId int) string {
 	h = sha3.SumKeccak256(s)
 
 	address := append(s, h[:4]...)
-	return base32.StdEncoding.EncodeToString(address)
+	return base32.StdEncoding.EncodeToString(address), nil
 }
 
 // KeyPairCreate generates a KeyPair using specified string 32 length or empty
 // param pk - A string 32 length or nil
 // return - The NEM KeyPair
-func KeyPairCreate(pk string) KeyPair {
+func KeyPairCreate(pk string) (*KeyPair, error) {
 	if pk != "" {
 		if len(pk) != 64 {
 			err := fmt.Errorf("insufficient seed length, should be %d, but got %d", 64, len(pk))
-			panic(err)
+			return nil, err
 		}
 		seed, err := hex.DecodeString(strings.TrimSpace(pk))
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		pair, err := FromSeed(seed)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
-		return pair
+		return &pair, nil
 	}
 
 	seed := make([]byte, PrivateBytes)
 	_, err := io.ReadFull(rand.Reader, seed)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	pair, err := FromSeed(seed)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return pair
+	return &pair, nil
 }
 
 // FromSeed generates a new private/public key pair using specified private key.
